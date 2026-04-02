@@ -22,18 +22,32 @@ async function verifyGoogleToken(token) {
   }
 
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    // Try verifying as ID Token first (JWT)
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      return ticket.getPayload();
+    } catch (idTokenError) {
+      // If ID Token verification fails, try as Access Token
+      const tokenInfo = await client.getTokenInfo(token);
 
-    const payload = ticket.getPayload();
+      // Fetch user profile using access token
+      const response = await fetch(
+        `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`,
+      );
+      const profile = await response.json();
 
-    if (!payload?.email) {
-      throw new HttpError(400, "Google account email is unavailable.");
+      if (!profile?.email) {
+        throw new HttpError(400, "Google account email is unavailable.");
+      }
+
+      return {
+        ...profile,
+        sub: profile.sub || tokenInfo.sub,
+      };
     }
-
-    return payload;
   } catch (error) {
     if (error instanceof HttpError) {
       throw error;

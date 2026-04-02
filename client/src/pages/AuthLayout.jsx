@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin as useGoogleOAuth } from "@react-oauth/google";
 import { useGoogleLogin, useGoogleSignup } from "@/hooks/useAuth";
+import { GoogleIcon } from "@/components/GoogleIcon";
 import ToggleTheme from "@/components/ToggleTheme";
 import { toast } from "sonner";
 
@@ -24,6 +26,20 @@ export function AuthLayout({
 
   const handleSuccess = isLogin ? loginSuccess : signupSuccess;
   const handleError = isLogin ? loginError : signupError;
+
+  const handleOAuthSuccess = (response) => {
+    handleSuccess(response);
+  };
+
+  const handleOAuthError = (error) => {
+    handleError(error);
+  };
+
+  const loginWithGoogle = useGoogleOAuth({
+    onSuccess: handleOAuthSuccess,
+    onError: handleOAuthError,
+    flow: "implicit",
+  });
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
@@ -54,22 +70,22 @@ export function AuthLayout({
                 )}
               </div>
               <Field className="items-center">
-                <GoogleLogin
-                  onSuccess={handleSuccess}
-                  onError={handleError}
-                  context={isLogin ? "signin" : "signup"}
-                  text={isLogin ? "continue_with" : "signup_with"}
-                  theme="outline"
-                  size="large"
-                  shape="pill"
-                  click_listener={() => {
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2 rounded-full py-6 font-semibold"
+                  onClick={() => {
                     toast.info(
                       isLogin
                         ? "Signing in with Google..."
                         : "Signing up with Google...",
                     );
+                    loginWithGoogle();
                   }}
-                />
+                >
+                  <GoogleIcon className="size-5" />
+                  {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                </Button>
               </Field>
             </FieldGroup>
           </form>

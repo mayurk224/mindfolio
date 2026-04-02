@@ -6,14 +6,17 @@ import { toast } from "sonner";
 export const useGoogleLogin = () => {
   const navigate = useNavigate();
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (response) => {
     try {
-      const response = await googleLogin(credentialResponse.credential);
+      // Handle both standard button (credential) and custom button (access_token)
+      const token = response.credential || response.access_token;
+      
+      const res = await googleLogin(token);
 
-      if (response.status === 200) {
+      if (res.status === 200) {
         toast.success("Login successful. Redirecting...");
         navigate("/");
-      } else if (response.status === 404) {
+      } else if (res.status === 404) {
         toast.error("Account does not exist. Please sign up.");
         navigate("/signup");
       } else {
@@ -38,14 +41,17 @@ export const useGoogleLogin = () => {
 export const useGoogleSignup = () => {
   const navigate = useNavigate();
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (response) => {
     try {
-      const response = await googleSignup(credentialResponse.credential);
+      // Handle both standard button (credential) and custom button (access_token)
+      const token = response.credential || response.access_token;
 
-      if (response.status === 201) {
+      const res = await googleSignup(token);
+
+      if (res.status === 201) {
         toast.success("Signup successful. Please login.");
         navigate("/login");
-      } else if (response.status === 409) {
+      } else if (res.status === 409) {
         toast.error("Account already exists. Please log in.");
         navigate("/login");
       } else {
