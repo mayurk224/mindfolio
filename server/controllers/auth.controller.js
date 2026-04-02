@@ -1,52 +1,105 @@
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import userModel from "../models/user.model.js";
+import { userModel } from "../models/user.model.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const isProduction = process.env.NODE_ENV === "production";
 
-async function googleLogin(req, res) {
-  const { token } = req.body; // The ID token sent from React
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function verifyGoogleToken(token) {
+  if (!token) {
+    throw new HttpError(400, "Google token is required.");
+  }
+
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    throw new HttpError(500, "Google auth is not configured on the server.");
+  }
 
   try {
-    // 1. Verify the token with Google
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    // 2. Extract the user's payload
     const payload = ticket.getPayload();
-    const { sub, email, name, picture } = payload;
-    // 'sub' is the unique Google ID
 
-    // 3. Find the user in MongoDB, or create them if they are new
-    let user = await userModel.findOne({ googleId: sub });
+    if (!payload?.email) {
+      throw new HttpError(400, "Google account email is unavailable.");
+    }
+
+    return payload;
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+
+    throw new HttpError(401, "Invalid Google token.");
+  }
+}
+
+function getJwtSecret() {
+  if (process.env.JWT_SECRET) {
+    return process.env.JWT_SECRET;
+  }
+
+  if (!isProduction) {
+    return "mindfolio-dev-jwt-secret";
+  }
+
+  throw new HttpError(500, "JWT auth is not configured on the server.");
+}
+
+function createAppToken(userId) {
+  return jwt.sign({ userId }, getJwtSecret(), {
+    expiresIn: "7d",
+  });
+}
+
+function setAuthCookie(res, token) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+}
+
+function handleAuthError(res, context, error) {
+  console.error(`${context} Error:`, error);
+
+  const status = error instanceof HttpError ? error.status : 500;
+  const message =
+    error instanceof HttpError
+      ? error.message
+      : "Something went wrong while processing authentication.";
+
+  return res.status(status).json({ message });
+}
+
+async function googleLogin(req, res) {
+  const { token } = req.body;
+
+  try {
+    const payload = await verifyGoogleToken(token);
+    const user = await userModel.findOne({ email: payload.email });
 
     if (!user) {
-      user = await userModel.create({
-        googleId: sub,
-        email: email,
-        displayName: name,
-        avatarUrl: picture,
+      return res.status(404).json({
+        message: "Account does not exist. Please sign up first.",
       });
     }
 
-    // 4. Create your own JWT so your app remembers they are logged in
-    const appToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }, // Token expires in 7 days
-    );
+    const appToken = createAppToken(user._id);
 
-    res.cookie("token", appToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    setAuthCookie(res, appToken);
 
-    // 5. Send the token and user data back to React
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       token: appToken,
       user: {
@@ -57,9 +110,42 @@ async function googleLogin(req, res) {
       },
     });
   } catch (error) {
-    console.error("Google Auth Error:", error);
-    res.status(401).json({ message: "Invalid Google Token" });
+    return handleAuthError(res, "Google Login", error);
   }
 }
 
-export { googleLogin };
+async function googleSignup(req, res) {
+  const { token } = req.body;
+
+  try {
+    const payload = await verifyGoogleToken(token);
+    let user = await userModel.findOne({ email: payload.email });
+
+    if (user) {
+      return res.status(409).json({
+        message: "Account already exists with this email. Please log in.",
+      });
+    }
+
+    user = await userModel.create({
+      googleId: payload.sub,
+      email: payload.email,
+      displayName: payload.name,
+      avatarUrl: payload.picture,
+    });
+
+    return res.status(201).json({
+      message: "Account created successfully, please login",
+      user: {
+        id: user._id,
+        name: user.displayName,
+        email: user.email,
+        avatar: user.avatarUrl,
+      },
+    });
+  } catch (error) {
+    return handleAuthError(res, "Google Signup", error);
+  }
+}
+
+export { googleLogin, googleSignup };
