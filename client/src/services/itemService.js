@@ -14,3 +14,15 @@ export const saveItemToDB = async (itemData) => {
 
   return response;
 };
+
+export const getItemsFromDB = async () => {
+  const response = await fetch(`${API_URL}/`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response;
+};

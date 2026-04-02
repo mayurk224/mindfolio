@@ -15,6 +15,8 @@ import {
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PopoverForm from "@/components/PopoverForm";
+import MediaCard from "@/components/MediaCard";
+import MonthContainer from "@/components/TimelineSection";
 
 const Home = () => {
   return (
@@ -33,27 +35,22 @@ const Home = () => {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          {Array.from({ length: 24 }).map((_, index) => (
-            <div
-              key={index}
-              className="aspect-video h-12 w-full rounded-lg bg-muted/50"
-            />
-          ))}
+        <div className="p-4">
+          <MonthContainer />
+        </div>
 
-          <div className="fixed bottom-5 right-5">
-            <Popover>
-              <PopoverTrigger>
-                <Button>
-                  <Plus className="h-4 w-4" />
-                  Add Item
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-96">
-                <PopoverForm />
-              </PopoverContent>
-            </Popover>
-          </div>
+        <div className="fixed bottom-5 right-5">
+          <Popover>
+            <PopoverTrigger>
+              <Button>
+                <Plus className="h-4 w-4" />
+                Add Item
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96">
+              <PopoverForm />
+            </PopoverContent>
+          </Popover>
         </div>
       </SidebarInset>
     </SidebarProvider>

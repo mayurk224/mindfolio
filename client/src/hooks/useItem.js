@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { saveItemToDB } from "@/services/itemService";
+import { saveItemToDB, getItemsFromDB } from "@/services/itemService";
 
 export const useItem = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [items, setItems] = useState([]);
 
   const saveItem = async (itemData) => {
     setIsLoading(true);
@@ -26,5 +27,27 @@ export const useItem = () => {
     }
   };
 
-  return { saveItem, isLoading, error };
+  const fetchItems = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getItemsFromDB();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch items.");
+      }
+
+      setItems(data.items);
+      setIsLoading(false);
+      return { success: true, data: data.items };
+    } catch (err) {
+      console.error("Fetch Items Error:", err);
+      setIsLoading(false);
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  return { saveItem, fetchItems, items, isLoading, error };
 };

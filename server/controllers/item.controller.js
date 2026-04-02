@@ -53,4 +53,22 @@ async function saveManualItem(req, res) {
   }
 }
 
-export { saveManualItem };
+// GET /api/items/
+// Route to fetch all items for the authenticated user
+async function getUserItems(req, res) {
+  try {
+    const items = await itemModel
+      .find({ userId: req.userId })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Items fetched successfully!",
+      items,
+    });
+  } catch (error) {
+    console.error("Error fetching items:", error);
+    res.status(500).json({ message: "Server error while fetching items." });
+  }
+}
+
+export { saveManualItem, getUserItems };
