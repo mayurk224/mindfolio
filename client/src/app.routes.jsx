@@ -3,11 +3,16 @@ import Terms from "./pages/Terms";
 import LegalPrivacy from "./pages/LegalPrivacy";
 import { AuthLayout } from "./pages/AuthLayout";
 import Home from "./pages/Home";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: (
+      <ProtectedRoute>
+        <Home />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/login",

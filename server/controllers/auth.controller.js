@@ -162,4 +162,33 @@ async function googleSignup(req, res) {
   }
 }
 
-export { googleLogin, googleSignup };
+async function getMe(req, res) {
+  const { token } = req.cookies;
+
+  if (!token) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, getJwtSecret());
+    const user = await userModel.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.displayName,
+        email: user.email,
+        avatar: user.avatarUrl,
+      },
+    });
+  } catch (error) {
+    console.error("verify error", error);
+    return res.status(401).json({ message: "Invalid session" });
+  }
+}
+
+export { googleLogin, googleSignup, getMe };

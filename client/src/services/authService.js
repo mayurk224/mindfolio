@@ -25,3 +25,14 @@ export const googleLogin = async (token) => {
 
   return response;
 };
+export const getMe = async () => {
+  const response = await fetch(`${API_URL}/me`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response;
+};

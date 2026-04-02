@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, Navigate } from "react-router";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
 import { useGoogleLogin as useGoogleOAuth } from "@react-oauth/google";
 import { useGoogleLogin, useGoogleSignup } from "@/hooks/useAuth";
+import { useAuthContext } from "@/context/AuthContext";
 import { GoogleIcon } from "@/components/GoogleIcon";
 import ToggleTheme from "@/components/ToggleTheme";
 import { toast } from "sonner";
@@ -18,11 +19,16 @@ export function AuthLayout({
 }) {
   const location = useLocation();
   const isLogin = location.pathname === "/login";
+  const { user, loading } = useAuthContext();
 
   const { handleGoogleSuccess: loginSuccess, handleGoogleError: loginError } =
     useGoogleLogin();
   const { handleGoogleSuccess: signupSuccess, handleGoogleError: signupError } =
     useGoogleSignup();
+
+  if (user && !loading) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSuccess = isLogin ? loginSuccess : signupSuccess;
   const handleError = isLogin ? loginError : signupError;
