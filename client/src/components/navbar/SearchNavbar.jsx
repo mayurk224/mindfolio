@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   CircleFadingPlus,
+  File,
   FileCode,
   Globe,
   Image,
@@ -12,13 +13,13 @@ import {
   Quote,
   Search,
   Video,
-  X,
 } from "lucide-react";
 
 const tabs = [
   { id: "web", label: "Web Pages", icon: Globe },
   { id: "images", label: "Images", icon: Image },
   { id: "videos", label: "Videos", icon: Video },
+  { id: "documents", label: "Documents", icon: File },
   { id: "articles", label: "Articles", icon: Newspaper },
   { id: "notes", label: "Notes", icon: NotebookPen },
   { id: "youtube", label: "YouTube Videos", icon: Play },

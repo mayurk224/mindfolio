@@ -69,7 +69,7 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="md:h-8 md:p-0" render={<a href="#" />}>

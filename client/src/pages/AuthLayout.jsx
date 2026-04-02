@@ -26,10 +26,6 @@ export function AuthLayout({
   const { handleGoogleSuccess: signupSuccess, handleGoogleError: signupError } =
     useGoogleSignup();
 
-  if (user && !loading) {
-    return <Navigate to="/" replace />;
-  }
-
   const handleSuccess = isLogin ? loginSuccess : signupSuccess;
   const handleError = isLogin ? loginError : signupError;
 
@@ -46,6 +42,10 @@ export function AuthLayout({
     onError: handleOAuthError,
     flow: "implicit",
   });
+
+  if (user && !loading) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">

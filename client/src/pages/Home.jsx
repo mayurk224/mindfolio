@@ -7,6 +7,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import SearchNavbar from "@/components/navbar/SearchNavbar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import PopoverForm from "@/components/PopoverForm";
 
 const Home = () => {
   return (
@@ -32,6 +40,20 @@ const Home = () => {
               className="aspect-video h-12 w-full rounded-lg bg-muted/50"
             />
           ))}
+
+          <div className="fixed bottom-5 right-5">
+            <Popover>
+              <PopoverTrigger>
+                <Button>
+                  <Plus className="h-4 w-4" />
+                  Add Item
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-96">
+                <PopoverForm />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
