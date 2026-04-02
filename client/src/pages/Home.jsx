@@ -1,19 +1,12 @@
 import React from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import SearchNavbar from "@/components/navbar/SearchNavbar";
 
 const Home = () => {
   return (
@@ -21,27 +14,15 @@ const Home = () => {
       <AppSidebar />
 
       <SidebarInset>
-        <header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
-          <SidebarTrigger className="-ml-1" />
-
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">All Inboxes</BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator className="hidden md:block" />
-
-              <BreadcrumbItem>
-                <BreadcrumbPage>Inbox</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        <header className="sticky top-0 flex flex-col shrink-0 gap-4 border-b bg-background/95 backdrop-blur-sm z-50 px-4 md:px-6 pt-4 md:pt-6">
+          <div className="flex gap-2">
+            <SidebarTrigger className="-ml-1 h-8 w-8 hover:bg-accent transition-colors" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4 hidden md:block"
+            />
+            <SearchNavbar className="flex-1" />
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4">
