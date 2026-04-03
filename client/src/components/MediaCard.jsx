@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 export default function MediaCard({ item: initialItem, className }) {
   const [item, setItem] = useState(initialItem);
   const hasImage = !!item.thumbnailUrl;
-  const isProcessing = item.status === "pending" || item.status === "processing";
+  const isProcessing =
+    item.status === "pending" || item.status === "processing";
 
   useEffect(() => {
     if (!isProcessing) return;
@@ -20,7 +21,8 @@ export default function MediaCard({ item: initialItem, className }) {
         const response = await fetch(`${API_URL}/${item._id}`, {
           credentials: "include",
           headers: {
-            ...(token && token !== "null" && { Authorization: `Bearer ${token}` }),
+            ...(token &&
+              token !== "null" && { Authorization: `Bearer ${token}` }),
             "Content-Type": "application/json",
           },
         });
@@ -29,7 +31,10 @@ export default function MediaCard({ item: initialItem, className }) {
           const updatedItem = await response.json();
           setItem(updatedItem);
 
-          if (updatedItem.status === "completed" || updatedItem.status === "failed") {
+          if (
+            updatedItem.status === "completed" ||
+            updatedItem.status === "failed"
+          ) {
             clearInterval(pollInterval);
           }
         }
@@ -56,7 +61,9 @@ export default function MediaCard({ item: initialItem, className }) {
           alt={item.title}
           className={cn(
             "absolute inset-0 w-full h-full object-cover transition-all duration-700",
-            isProcessing ? "blur-sm scale-110 opacity-50" : "group-hover:scale-105"
+            isProcessing
+              ? "blur-sm scale-110 opacity-50"
+              : "group-hover:scale-105",
           )}
         />
       )}
@@ -74,7 +81,7 @@ export default function MediaCard({ item: initialItem, className }) {
 
       {/* ✅ Fallback Content (when no image) */}
       {!hasImage && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-4">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-4 transition-opacity duration-300 group-hover:opacity-0">
           <div className="flex items-center justify-center p-4 rounded-full bg-muted border border-border">
             {isProcessing ? (
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
