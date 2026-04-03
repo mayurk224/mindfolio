@@ -59,7 +59,7 @@ const Home = () => {
           <TimelineSection items={items} isLoading={isLoading} />
         </div>
 
-        <div className="fixed bottom-5 right-5">
+        <div className="fixed bottom-5 right-5 z-50">
           <Popover>
             <PopoverTrigger>
               <Button>

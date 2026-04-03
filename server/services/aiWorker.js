@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import { itemModel } from "../models/item.model.js";
-import { redisConnection, structuredLlm } from "../config/ai.config.js";
+import { redisConnection, structuredLlm, embedder } from "../config/ai.config.js";
 
 // --- Scraper ---
 async function extractTextFromUrl(url) {
@@ -59,12 +59,16 @@ export const aiWorker = new Worker(
         ${cleanText}
       `);
 
+      console.log(`[Worker] 🧬 Generating Embedding...`);
+      const embedding = await embedder.embedQuery(cleanText);
+
       await itemModel.findByIdAndUpdate(documentId, {
         status: "completed",
         title: finalTitle, // From the scraper
         type: aiResult.type, // From Mistral AI
         summary: aiResult.summary, // From Mistral AI
         aiTags: aiResult.tags, // From Mistral AI
+        embedding: embedding, // <--- SAVE TO MONGO!
       });
 
       console.log(`[Worker] ✅ Done`, aiResult.tags);

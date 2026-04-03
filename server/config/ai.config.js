@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { Queue } from "bullmq";
 import Redis from "ioredis";
-import { ChatMistralAI } from "@langchain/mistralai";
+import { ChatMistralAI, MistralAIEmbeddings } from "@langchain/mistralai";
 import { z } from "zod";
 
 // Redis
@@ -20,6 +20,11 @@ const llm = new ChatMistralAI({
   apiKey: process.env.MISTRAL_API_KEY,
   model: "mistral-small-latest",
   temperature: 0,
+});
+
+export const embedder = new MistralAIEmbeddings({
+  apiKey: process.env.MISTRAL_API_KEY,
+  model: "mistral-embed",
 });
 
 // Schema
