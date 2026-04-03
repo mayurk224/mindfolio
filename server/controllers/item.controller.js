@@ -6,49 +6,46 @@ async function saveManualItem(req, res) {
   try {
     const { url, title, type, textContent } = req.body;
 
-    // 1. Basic Validation
-    if (!url) {
-      return res
-        .status(400)
-        .json({ message: "URL is required to save an item." });
+    // 1. Updated Validation: Must have EITHER a URL or Text
+    if (!url && !textContent) {
+      return res.status(400).json({
+        message: "Please provide either a URL or text content to save.",
+      });
     }
 
-    // 2. Check for Duplicates
-    // We prevent the user from saving the exact same URL twice
-    const existingItem = await itemModel.findOne({
-      userId: req.userId,
-      url: url,
-    });
-    if (existingItem) {
-      return res
-        .status(409)
-        .json({ message: "You have already saved this link." });
+    // 2. Check for Duplicates (ONLY if a URL is provided)
+    if (url) {
+      const existingItem = await itemModel.findOne({
+        userId: req.userId,
+        url: url,
+      });
+      if (existingItem) {
+        return res
+          .status(409)
+          .json({ message: "You have already saved this link." });
+      }
     }
 
-    // 3. Save to Database
+    // 3. Determine the Type automatically if not provided
+    const itemType = type || (url ? "other" : "note");
+
+    // 4. Save to Database
     const newItem = await itemModel.create({
-      userId: req.userId, // Pulled securely from the JWT middleware
-      url,
-      title: title || "Untitled Document",
-      type: type || "other",
+      userId: req.userId,
+      url: url || undefined, // Use undefined so Mongoose doesn't save a null string
+      title: title || (url ? "Untitled Document" : "Untitled Note"),
+      type: itemType,
       textContent: textContent || "",
-      status: "completed", // Bypassing AI, so it's "done" immediately
-      aiTags: ["manual-save"], // A placeholder tag so you have something to display
+      status: "completed",
+      aiTags: ["manual-save"],
     });
 
-    // 4. Send Success Response
     res.status(201).json({
-      message: "Item saved successfully!",
-      item: {
-        id: newItem._id,
-        url: newItem.url,
-        title: newItem.title,
-        type: newItem.type,
-        tags: newItem.aiTags,
-      },
+      message: "Saved successfully!",
+      item: newItem,
     });
   } catch (error) {
-    console.error("Error saving manual item:", error);
+    console.error("Error saving item:", error);
     res.status(500).json({ message: "Server error while saving the item." });
   }
 }

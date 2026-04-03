@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -14,11 +14,31 @@ import {
 } from "@/components/ui/popover";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TimelineSection from "@/components/TimelineSection";
+import { useItem } from "@/hooks/useItem";
 import PopoverForm from "@/components/PopoverForm";
-import MediaCard from "@/components/MediaCard";
-import MonthContainer from "@/components/TimelineSection";
 
 const Home = () => {
+  const [items, setItems] = useState([]);
+  const { fetchItems, isLoading } = useItem();
+
+  useEffect(() => {
+    const getInitialItems = async () => {
+      const result = await fetchItems();
+      if (result.success && result.items) {
+        setItems(result.items);
+      } else if (result.success && !result.items) {
+        // Fallback for different return structure if any
+        setItems(result.data?.items || []);
+      }
+    };
+    getInitialItems();
+  }, []);
+
+  const handleItemAdded = (newItem) => {
+    setItems((prev) => [newItem, ...prev]);
+  };
+
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -36,7 +56,7 @@ const Home = () => {
         </header>
 
         <div className="p-4">
-          <MonthContainer />
+          <TimelineSection items={items} isLoading={isLoading} />
         </div>
 
         <div className="fixed bottom-5 right-5">
@@ -48,7 +68,7 @@ const Home = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-96">
-              <PopoverForm />
+              <PopoverForm onSuccess={handleItemAdded} />
             </PopoverContent>
           </Popover>
         </div>

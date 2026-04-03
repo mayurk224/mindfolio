@@ -15,7 +15,7 @@ import { useItem } from "@/hooks/useItem";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-export default function PopoverForm() {
+export default function PopoverForm({ onSuccess }) {
   const { saveItem, isLoading } = useItem();
   const [formData, setFormData] = useState({
     url: "",
@@ -42,6 +42,9 @@ export default function PopoverForm() {
     const result = await saveItem(formData);
     if (result.success) {
       toast.success("Item saved successfully!");
+      if (onSuccess && result.item) {
+        onSuccess(result.item);
+      }
       setFormData({
         url: "",
         title: "",

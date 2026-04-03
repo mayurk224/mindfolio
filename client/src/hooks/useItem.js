@@ -18,7 +18,7 @@ export const useItem = () => {
       }
 
       setIsLoading(false);
-      return { success: true, data };
+      return { success: true, item: data.item, data };
     } catch (err) {
       console.error("Save Item Error:", err);
       setIsLoading(false);
@@ -40,7 +40,7 @@ export const useItem = () => {
 
       setItems(data.items);
       setIsLoading(false);
-      return { success: true, data: data.items };
+      return { success: true, items: data.items, data };
     } catch (err) {
       console.error("Fetch Items Error:", err);
       setIsLoading(false);

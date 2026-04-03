@@ -11,7 +11,7 @@ const itemSchema = new mongoose.Schema(
     },
     url: {
       type: String,
-      required: true,
+      required: false,
     },
     type: {
       type: String,
@@ -79,6 +79,6 @@ const itemSchema = new mongoose.Schema(
 );
 
 // Optional: Compound index to prevent users from saving the exact same URL twice
-itemSchema.index({ userId: 1, url: 1 }, { unique: true });
+itemSchema.index({ userId: 1, url: 1 }, { unique: true, sparse: true });
 
 export const itemModel = mongoose.model("items", itemSchema);
