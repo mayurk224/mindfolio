@@ -1,3 +1,4 @@
+import { aiQueue } from "../config/ai.config.js";
 import { itemModel } from "../models/item.model.js";
 
 // POST /api/items/manual
@@ -32,12 +33,19 @@ async function saveManualItem(req, res) {
     // 4. Save to Database
     const newItem = await itemModel.create({
       userId: req.userId,
-      url: url || undefined, // Use undefined so Mongoose doesn't save a null string
-      title: title || (url ? "Untitled Document" : "Untitled Note"),
+      url: url || undefined,
+      title: title || (url ? "Processing Link..." : "Untitled Note"),
       type: itemType,
       textContent: textContent || "",
-      status: "completed",
-      aiTags: ["manual-save"],
+      status: "pending", // <--- Changed to pending
+    });
+
+    // 2. DROP THE JOB IN THE QUEUE
+    await aiQueue.add("process-item", {
+      documentId: newItem._id,
+      url: newItem.url,
+      textContent: newItem.textContent,
+      type: newItem.type,
     });
 
     res.status(201).json({
@@ -68,4 +76,25 @@ async function getUserItems(req, res) {
   }
 }
 
-export { saveManualItem, getUserItems };
+// GET /api/items/:id
+// A fast route to check the status of a specific item
+async function getItemStatus(req, res) {
+  try {
+    // Look up the specific item. We include userId to ensure they own it!
+    const item = await itemModel.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.status(200).json(item);
+  } catch (error) {
+    console.error("Error checking item status:", error);
+    res.status(500).json({ message: "Failed to fetch item status." });
+  }
+}
+
+export { saveManualItem, getUserItems, getItemStatus };

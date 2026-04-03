@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config();
+import "./services/aiWorker.js";
 
 const { default: app } = await import("./src/app.js");
 const { default: connectDB } = await import("./config/db.js");

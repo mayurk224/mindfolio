@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown, Loader2 } from "lucide-react";
 import MediaCard from "./MediaCard";
+import ItemDetailModal from "./ItemDetailModal";
 import { cn } from "@/lib/utils";
 
 export default function TimelineSection({ items = [], isLoading = false }) {
-
-
+  const [selectedItem, setSelectedItem] = useState(null);
 
   if (isLoading) {
     return (
@@ -98,13 +98,16 @@ export default function TimelineSection({ items = [], isLoading = false }) {
                   {/* MediaCard Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                     {dayItems.map((item) => (
-                      <MediaCard
+                      <div
                         key={item._id}
-                        title={item.title}
-                        category={item.type}
-                        image={item.thumbnailUrl || undefined}
-                        className={cn(!item.thumbnailUrl && "aspect-auto")}
-                      />
+                        onClick={() => setSelectedItem(item)}
+                        className="cursor-pointer"
+                      >
+                        <MediaCard
+                          item={item}
+                          className={cn(!item.thumbnailUrl && "aspect-auto")}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -112,6 +115,12 @@ export default function TimelineSection({ items = [], isLoading = false }) {
           </CollapsibleContent>
         </Collapsible>
       ))}
+
+      <ItemDetailModal
+        item={selectedItem}
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 }
