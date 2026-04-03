@@ -105,7 +105,11 @@ export default function TimelineSection({ items = [], isLoading = false }) {
                       >
                         <MediaCard
                           item={item}
-                          className={cn(!item.thumbnailUrl && "aspect-auto")}
+                          className={cn(
+                            !item.thumbnailUrl && "aspect-auto",
+                            selectedItem?._id === item._id &&
+                              "ring-2 ring-primary/40 shadow-2xl shadow-primary/10 scale-[0.985]",
+                          )}
                         />
                       </div>
                     ))}
