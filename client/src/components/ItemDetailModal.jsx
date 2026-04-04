@@ -41,6 +41,15 @@ function getTypeLabel(type) {
   return TYPE_LABELS[type] || "Saved Item";
 }
 
+function getYouTubeEmbedUrl(url) {
+  if (!url) return "";
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11
+    ? `https://www.youtube.com/embed/${match[2]}`
+    : url;
+}
+
 function getDomain(url) {
   if (!url) return "";
   try {
@@ -138,6 +147,8 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
   const hasUrl = Boolean(item.url);
   const domain = getDomain(item.url);
   const typeLabel = getTypeLabel(item.type);
+  const isYouTube = item.type === "youtube";
+  const previewUrl = isYouTube ? getYouTubeEmbedUrl(item.url) : item.url;
   const summary =
     item.summary ||
     "No AI summary yet. Once processing finishes, this space can hold a quick overview of the saved item.";
@@ -238,10 +249,12 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
                   <iframe
                     key={item._id}
                     title={item.title || "Item preview"}
-                    src={item.url}
+                    src={previewUrl}
                     loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
                     onLoad={() => setIsPreviewLoading(false)}
-                    className="h-full min-h-72 w-full bg-white"
+                    className={cn("h-full min-h-72 w-full bg-white", isYouTube && "bg-black")}
                   />
                 </>
               ) : (
@@ -278,7 +291,7 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
                   </Badge>
 
                   <div className="space-y-3">
-                    <h2 className="text-2xl font-bold leading-tight text-foreground sm:text-[1.5rem]">
+                    <h2 className="text-2xl font-bold leading-tight text-foreground sm:text-[1.5rem] line-clamp-2">
                       {item.title || "Untitled item"}
                     </h2>
 
