@@ -23,6 +23,7 @@ const Home = () => {
   const { fetchItems, isLoading } = useItem();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     const getInitialItems = async () => {
@@ -90,6 +91,11 @@ const Home = () => {
     if (result.success) setItems(result.items || []);
   };
 
+  const filteredItems =
+    activeTab === "all"
+      ? items
+      : items.filter((item) => item.type === activeTab);
+
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -108,6 +114,8 @@ const Home = () => {
               handleSearch={handleSearch}
               isSearching={isSearching}
               clearSearch={clearSearch}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
               className="flex-1"
             />
           </div>
@@ -115,7 +123,7 @@ const Home = () => {
 
         <div className="p-4">
           <TimelineSection
-            items={items}
+            items={filteredItems}
             isLoading={isLoading}
             onItemUpdate={handleItemUpdated}
           />

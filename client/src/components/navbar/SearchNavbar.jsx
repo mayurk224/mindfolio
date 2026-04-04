@@ -7,6 +7,7 @@ import {
   FileCode,
   Globe,
   Image,
+  LayoutGrid,
   Loader2,
   Newspaper,
   NotebookPen,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 const tabs = [
+  { id: "all", label: "Everything", icon: LayoutGrid },
   { id: "web", label: "Web Pages", icon: Globe },
   { id: "images", label: "Images", icon: Image },
   { id: "videos", label: "Videos", icon: Video },
@@ -36,10 +38,10 @@ const SearchNavbar = ({
   handleSearch,
   isSearching,
   clearSearch,
+  activeTab,
+  setActiveTab,
   className,
 }) => {
-  const [activeTab, setActiveTab] = useState("web");
-
   return (
     <div className={cn("flex w-full flex-col gap-2", className)}>
       {/* Search Input Section */}
