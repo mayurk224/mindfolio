@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Mindfolio Context Sender",
+  "version": "1.0.0",
+  "description": "Send webpages, images, videos, and YouTube links to the Mindfolio backend from the right-click menu.",
+  "permissions": ["contextMenus", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
