@@ -10,7 +10,8 @@ export default function MediaCard({
   const [item, setItem] = useState(initialItem);
   const displayImage =
     item.thumbnailUrl || (item.type === "images" ? item.url : null);
-  const hasImage = !!displayImage;
+  const isVideo = item.type === "videos" && item.url;
+  const hasPreview = !!displayImage || isVideo;
   const isProcessing =
     item.status === "pending" || item.status === "processing";
 
@@ -62,22 +63,36 @@ export default function MediaCard({
         className,
       )}
     >
-      {/* Background Image */}
-      {hasImage && (
-        <img
-          src={displayImage}
-          alt={item.title}
+      {/* Background Image / Video Preview */}
+      {isVideo ? (
+        <video
+          src={`${item.url}#t=0.5`}
           className={cn(
             "absolute inset-0 w-full h-full object-cover transition-all duration-700",
             isProcessing
               ? "blur-sm scale-110 opacity-50"
               : "group-hover:scale-105",
           )}
+          preload="metadata"
+          muted
         />
+      ) : (
+        !!displayImage && (
+          <img
+            src={displayImage}
+            alt={item.title}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+              isProcessing
+                ? "blur-sm scale-110 opacity-50"
+                : "group-hover:scale-105",
+            )}
+          />
+        )
       )}
 
       {/* Icon Badge (top right) */}
-      {hasImage && (
+      {hasPreview && (
         <div className="absolute top-4 right-4 z-20 backdrop-blur-md bg-white/10 border border-white/20 p-2.5 rounded-full text-white shadow-lg">
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -87,8 +102,8 @@ export default function MediaCard({
         </div>
       )}
 
-      {/* ✅ Fallback Content (when no image) */}
-      {!hasImage && (
+      {/* ✅ Fallback Content (when no preview) */}
+      {!hasPreview && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-4 transition-opacity duration-300 group-hover:opacity-0">
           <div className="flex items-center justify-center p-4 rounded-full bg-muted border border-border">
             {isProcessing ? (
@@ -148,8 +163,8 @@ export default function MediaCard({
         <div className="h-1 w-0 bg-primary group-hover:w-full transition-all duration-700 ease-in-out rounded-full" />
       </div>
 
-      {/* Bottom gradient (only when image exists) */}
-      {hasImage && (
+      {/* Bottom gradient (only when preview exists) */}
+      {hasPreview && (
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/50 to-transparent opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
       )}
     </div>

@@ -246,16 +246,30 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
                       <Skeleton className="h-full w-full rounded-[1.4rem] bg-white/8" />
                     </div>
                   )}
-                  <iframe
-                    key={item._id}
-                    title={item.title || "Item preview"}
-                    src={previewUrl}
-                    loading="lazy"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    onLoad={() => setIsPreviewLoading(false)}
-                    className={cn("h-full min-h-72 w-full bg-white", isYouTube && "bg-black")}
-                  />
+                  {item.type === "images" ? (
+                    <div className="flex h-full w-full items-center justify-center bg-black/5 p-2 sm:p-4">
+                      <img
+                        src={item.url}
+                        alt={item.title}
+                        onLoad={() => setIsPreviewLoading(false)}
+                        className="max-h-full max-w-full rounded-2xl object-contain shadow-lg"
+                      />
+                    </div>
+                  ) : (
+                    <iframe
+                      key={item._id}
+                      title={item.title || "Item preview"}
+                      src={previewUrl}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      onLoad={() => setIsPreviewLoading(false)}
+                      className={cn(
+                        "h-full min-h-72 w-full bg-white",
+                        isYouTube && "bg-black",
+                      )}
+                    />
+                  )}
                 </>
               ) : (
                 <div className="flex h-full min-h-72 flex-col items-center justify-center gap-4 px-6 text-center text-white">

@@ -27,9 +27,7 @@ const tabs = [
   { id: "articles", label: "Articles", icon: Newspaper },
   { id: "notes", label: "Notes", icon: NotebookPen },
   { id: "youtube", label: "YouTube Videos", icon: Play },
-  { id: "quotes", label: "Quotes", icon: Quote },
   { id: "posts", label: "Posts", icon: CircleFadingPlus },
-  { id: "snippets", label: "Snippets", icon: FileCode },
 ];
 
 const SearchNavbar = ({
