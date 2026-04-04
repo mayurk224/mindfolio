@@ -75,11 +75,37 @@ function createAppToken(userId) {
   });
 }
 
+function getCookieSameSite() {
+  const configuredValue = (
+    process.env.AUTH_COOKIE_SAME_SITE || (isProduction ? "none" : "lax")
+  ).toLowerCase();
+
+  if (["lax", "strict", "none"].includes(configuredValue)) {
+    return configuredValue;
+  }
+
+  return isProduction ? "none" : "lax";
+}
+
+function getCookieSecure(sameSite) {
+  if (process.env.AUTH_COOKIE_SECURE === "true") {
+    return true;
+  }
+
+  if (process.env.AUTH_COOKIE_SECURE === "false") {
+    return false;
+  }
+
+  return isProduction || sameSite === "none";
+}
+
 function setAuthCookie(res, token) {
+  const sameSite = getCookieSameSite();
+
   res.cookie("token", token, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: getCookieSecure(sameSite),
+    sameSite,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
@@ -115,7 +141,6 @@ async function googleLogin(req, res) {
 
     return res.status(200).json({
       message: "Login successful",
-      token: appToken,
       user: {
         id: user._id,
         name: user.displayName,
@@ -166,7 +191,9 @@ async function getMe(req, res) {
   const { token } = req.cookies;
 
   if (!token) {
-    return res.status(401).json({ message: "Not authenticated" });
+    return res
+      .status(401)
+      .json({ isAuthenticated: false, message: "Not authenticated" });
   }
 
   try {
@@ -174,10 +201,13 @@ async function getMe(req, res) {
     const user = await userModel.findById(decoded.userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({ isAuthenticated: false, message: "User not found" });
     }
 
     return res.status(200).json({
+      isAuthenticated: true,
       user: {
         id: user._id,
         name: user.displayName,
@@ -187,8 +217,24 @@ async function getMe(req, res) {
     });
   } catch (error) {
     console.error("verify error", error);
-    return res.status(401).json({ message: "Invalid session" });
+    return res
+      .status(401)
+      .json({ isAuthenticated: false, message: "Invalid session" });
   }
 }
 
-export { googleLogin, googleSignup, getMe };
+async function logout(req, res) {
+  try {
+    const sameSite = getCookieSameSite();
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: getCookieSecure(sameSite),
+      sameSite,
+    });
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    return handleAuthError(res, "Logout", error);
+  }
+}
+
+export { googleLogin, googleSignup, getMe, logout };

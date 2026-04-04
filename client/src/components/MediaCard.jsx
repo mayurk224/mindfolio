@@ -8,7 +8,9 @@ export default function MediaCard({
   onItemUpdate,
 }) {
   const [item, setItem] = useState(initialItem);
-  const hasImage = !!item.thumbnailUrl;
+  const displayImage =
+    item.thumbnailUrl || (item.type === "images" ? item.url : null);
+  const hasImage = !!displayImage;
   const isProcessing =
     item.status === "pending" || item.status === "processing";
 
@@ -63,7 +65,7 @@ export default function MediaCard({
       {/* Background Image */}
       {hasImage && (
         <img
-          src={item.thumbnailUrl}
+          src={displayImage}
           alt={item.title}
           className={cn(
             "absolute inset-0 w-full h-full object-cover transition-all duration-700",

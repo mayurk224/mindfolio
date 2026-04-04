@@ -17,12 +17,45 @@ const ALLOWED_ITEM_TYPES = [
   "other",
 ];
 
+const EXTENSION_TYPE_MAP = {
+  webpage: "web",
+  web: "web",
+  image: "images",
+  video: "videos",
+  youtube_video: "youtube",
+};
+
 function normalizeString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function isImageUrl(url) {
+  if (!url) return false;
+  return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(url);
+}
+
 function getRequestedType(value) {
-  return ALLOWED_ITEM_TYPES.includes(value) ? value : "";
+  const normalizedValue = normalizeString(value).toLowerCase();
+  const mappedValue = EXTENSION_TYPE_MAP[normalizedValue] || normalizedValue;
+  return ALLOWED_ITEM_TYPES.includes(mappedValue) ? mappedValue : "";
+}
+
+function buildTextContent({ description, textContent, pageUrl, resourceUrl }) {
+  if (textContent) {
+    return textContent;
+  }
+
+  const fragments = [];
+
+  if (description) {
+    fragments.push(description);
+  }
+
+  if (pageUrl && resourceUrl && pageUrl !== resourceUrl) {
+    fragments.push(`Source page: ${pageUrl}`);
+  }
+
+  return fragments.join("\n\n");
 }
 
 function getItemTypeFromMime(mime = "") {
@@ -52,10 +85,19 @@ function getItemTypeFromMime(mime = "") {
 // Route to manually save an item and queue it for AI processing
 async function saveManualItem(req, res) {
   try {
-    const url = normalizeString(req.body.url);
+    const legacyUrl = normalizeString(req.body.url);
+    const pageUrl = normalizeString(req.body.pageUrl);
+    const resourceUrl = normalizeString(req.body.resourceUrl);
     const title = normalizeString(req.body.title);
-    const textContent = normalizeString(req.body.textContent);
+    const description = normalizeString(req.body.description);
+    const textContent = buildTextContent({
+      description,
+      textContent: normalizeString(req.body.textContent),
+      pageUrl,
+      resourceUrl,
+    });
     const requestedType = getRequestedType(req.body.type);
+    const url = resourceUrl || pageUrl || legacyUrl;
 
     if (!url && !textContent) {
       return res
@@ -67,6 +109,8 @@ async function saveManualItem(req, res) {
     if (!itemType && url) {
       if (url.includes("youtube.com") || url.includes("youtu.be")) {
         itemType = "youtube";
+      } else if (isImageUrl(url)) {
+        itemType = "images";
       } else {
         itemType = "web";
       }
@@ -78,6 +122,7 @@ async function saveManualItem(req, res) {
       url: url || undefined,
       title: title || (url ? "Analyzing Link..." : "Analyzing Note..."),
       type: itemType,
+      thumbnailUrl: itemType === "images" ? url : undefined,
       textContent: textContent || undefined,
       status: "pending",
     });

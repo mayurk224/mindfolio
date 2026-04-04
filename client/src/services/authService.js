@@ -38,3 +38,15 @@ export const getMe = async () => {
 
   return response;
 };
+
+export const logout = async () => {
+  const response = await fetch(`${API_URL}/logout`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response;
+};
