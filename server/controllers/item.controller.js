@@ -63,7 +63,15 @@ async function saveManualItem(req, res) {
         .json({ message: "A URL or text content is required." });
     }
 
-    const itemType = requestedType || (url ? "web" : "notes");
+    let itemType = requestedType;
+    if (!itemType && url) {
+      if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        itemType = "youtube";
+      } else {
+        itemType = "web";
+      }
+    }
+    itemType = itemType || "notes";
 
     const newItem = new itemModel({
       userId: req.userId,
@@ -121,10 +129,12 @@ async function getUserItems(req, res) {
 async function getItemStatus(req, res) {
   try {
     // Look up the specific item. We include userId to ensure they own it!
-    const item = await itemModel.findOne({
-      _id: req.params.id,
-      userId: req.userId,
-    }).select("+textContent");
+    const item = await itemModel
+      .findOne({
+        _id: req.params.id,
+        userId: req.userId,
+      })
+      .select("+textContent");
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
@@ -217,7 +227,8 @@ async function uploadImage(req, res) {
     // manually selected type to override the final saved type.
     const detectedType = getItemTypeFromMime(req.file.mimetype);
     const itemType = requestedType || detectedType;
-    const shouldQueueForAi = detectedType === "images" || detectedType === "documents";
+    const shouldQueueForAi =
+      detectedType === "images" || detectedType === "documents";
 
     // 2. Upload to ImageKit (It accepts all files!)
     const imageKitResponse = await imagekit.upload({
@@ -270,4 +281,10 @@ async function uploadImage(req, res) {
   }
 }
 
-export { saveManualItem, getUserItems, getItemStatus, searchItems, uploadImage };
+export {
+  saveManualItem,
+  getUserItems,
+  getItemStatus,
+  searchItems,
+  uploadImage,
+};
