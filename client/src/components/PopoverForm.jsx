@@ -16,13 +16,15 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export default function PopoverForm({ onSuccess }) {
-  const { saveItem, isLoading } = useItem();
+  const { saveItem, uploadItem, isLoading } = useItem();
   const [formData, setFormData] = useState({
     url: "",
     title: "",
     type: "",
     textContent: "",
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileUploadKey, setFileUploadKey] = useState(0);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -33,24 +35,49 @@ export default function PopoverForm({ onSuccess }) {
     setFormData((prev) => ({ ...prev, type: value }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      url: "",
+      title: "",
+      type: "",
+      textContent: "",
+    });
+    setSelectedFile(null);
+    setFileUploadKey((prev) => prev + 1);
+  };
+
   const handleSubmit = async () => {
-    if (!formData.url && !formData.textContent) {
-      toast.error("Please enter a URL or text content.");
+    const payload = {
+      url: formData.url.trim(),
+      title: formData.title.trim(),
+      type: formData.type.trim(),
+      textContent: formData.textContent.trim(),
+    };
+
+    if (!payload.url && !payload.textContent && !selectedFile) {
+      toast.error("Please add a file, URL, or text content.");
       return;
     }
 
-    const result = await saveItem(formData);
+    if (selectedFile && payload.url) {
+      toast.error("Use either a file upload or a URL in one submission.");
+      return;
+    }
+
+    const result = selectedFile
+      ? await uploadItem(selectedFile, {
+          title: payload.title,
+          type: payload.type,
+          textContent: payload.textContent,
+        })
+      : await saveItem(payload);
+
     if (result.success) {
       toast.success("Item saved successfully!");
       if (onSuccess && result.item) {
         onSuccess(result.item);
       }
-      setFormData({
-        url: "",
-        title: "",
-        type: "",
-        textContent: "",
-      });
+      resetForm();
     } else {
       toast.error(result.error || "Failed to save item.");
     }
@@ -59,7 +86,11 @@ export default function PopoverForm({ onSuccess }) {
   return (
     <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto no-scrollbar">
       {/* File Upload (smaller) */}
-      <FileUploadBox />
+      <FileUploadBox
+        key={fileUploadKey}
+        onFileSelect={setSelectedFile}
+        disabled={isLoading}
+      />
 
       {/* URL */}
       <div className="flex flex-col gap-1">

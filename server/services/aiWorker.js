@@ -1,8 +1,18 @@
+import { HumanMessage } from "@langchain/core/messages";
 import { Worker } from "bullmq";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import { itemModel } from "../models/item.model.js";
-import { redisConnection, structuredLlm, embedder } from "../config/ai.config.js";
+import {
+  redisConnection,
+  structuredLlm,
+  embedder,
+  tagSchema,
+  ChatMistralAI,
+} from "../config/ai.config.js";
 
 // --- Scraper ---
 async function extractTextFromUrl(url) {
@@ -22,7 +32,7 @@ async function extractTextFromUrl(url) {
 export const aiWorker = new Worker(
   "content-processing",
   async (job) => {
-    const { documentId, url, textContent } = job.data;
+    const { documentId, url, textContent, sourceTitle, sourceType } = job.data;
 
     console.log(`[Worker] 🚀 Processing: ${documentId}`);
 
@@ -31,48 +41,112 @@ export const aiWorker = new Worker(
         status: "processing",
       });
 
-      let contentToAnalyze = textContent;
-      let finalTitle = "Untitled Document"; // Fallback
+      let aiResponse;
+      let textToEmbed;
+      let finalTitle = sourceTitle?.trim() || "Untitled Content";
+      let finalType = sourceType || job.data.type || "other";
 
-      // Scrape the URL
-      if (url && !contentToAnalyze) {
-        console.log(`[Worker] 🕷️ Scraping URL: ${url}`);
-        const articleData = await extractTextFromUrl(url);
+      if (job.data.type === "images") {
+        console.log(`[Worker] 👁️ Analyzing Image: ${url}`);
 
-        if (articleData) {
-          contentToAnalyze = articleData.textContent;
-          finalTitle = articleData.title; // <--- Grab the perfect title!
+        const visionModel = new ChatMistralAI({
+          model: "pixtral-12b-2409",
+          apiKey: process.env.MISTRAL_API_KEY,
+        }).withStructuredOutput(tagSchema);
+
+        aiResponse = await visionModel.invoke([
+          new HumanMessage({
+            content: [
+              {
+                type: "text",
+                text: "Analyze this image and generate a professional title, a 2-sentence summary, and 3-6 relevant tags. Set the 'type' to 'images'.",
+              },
+              { type: "image_url", image_url: url },
+            ],
+          }),
+        ]);
+
+        finalTitle = sourceTitle?.trim() || aiResponse.title || "Image Analysis";
+        textToEmbed = `${aiResponse.title}. ${aiResponse.summary} ${aiResponse.tags.join(", ")}`;
+        finalType = sourceType || job.data.type || "images";
+      } else if (job.data.type === "documents") {
+        console.log("[Worker] 📄 Downloading and extracting document text...");
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        let extractedText = "";
+        if (url.toLowerCase().endsWith(".pdf")) {
+          const pdfData = await pdfParse(buffer);
+          extractedText = pdfData.text;
+        } else {
+          // Fallback for .txt, .md, etc.
+          extractedText = buffer.toString("utf-8");
         }
+
+        // Safety net: truncate to avoid blowing up context window
+        const safeText = extractedText.substring(0, 25000);
+
+        aiResponse = await structuredLlm.invoke(
+          "Analyze this document. Provide a title, summary, and tags. Type MUST be 'documents'.\n\n" +
+            safeText,
+        );
+
+        textToEmbed = safeText;
+        finalTitle = sourceTitle?.trim() || aiResponse.title || "Document Analysis";
+        finalType = sourceType || job.data.type || "documents";
+      } else if (job.data.type === "web") {
+        // Standard Web Scraping Logic
+        let contentToAnalyze = textContent;
+
+        if (url && !contentToAnalyze) {
+          console.log(`[Worker] 🕷️ Scraping URL: ${url}`);
+          const articleData = await extractTextFromUrl(url);
+
+          if (articleData) {
+            contentToAnalyze = articleData.textContent;
+            if (!sourceTitle?.trim()) {
+              finalTitle = articleData.title || finalTitle;
+            }
+          }
+        }
+
+        if (!contentToAnalyze) {
+          throw new Error("No readable text found.");
+        }
+
+        const cleanText = contentToAnalyze.slice(0, 15000);
+        console.log(`[Worker] 🧠 Calling AI for Text...`);
+
+        aiResponse = await structuredLlm.invoke(`
+          Analyze the following text and extract the required information.
+          CRITICAL: You MUST return a maximum of 6 tags. Do not exceed this limit under any circumstances.
+          TEXT:
+          ${cleanText}
+        `);
+
+        textToEmbed = cleanText;
+        if (!sourceTitle?.trim()) {
+          finalTitle = aiResponse.title || finalTitle || "Web Content";
+        }
+        finalType = sourceType || aiResponse.type || finalType;
+      } else {
+        throw new Error(`Unsupported job type: ${job.data.type}`);
       }
-
-      if (!contentToAnalyze) {
-        throw new Error("No readable text found.");
-      }
-
-      const cleanText = contentToAnalyze.slice(0, 15000);
-
-      console.log(`[Worker] 🧠 Calling AI...`);
-
-      const aiResult = await structuredLlm.invoke(`
-        Analyze the following text and extract the required information.
-        CRITICAL: You MUST return a maximum of 6 tags. Do not exceed this limit under any circumstances.
-        TEXT:
-        ${cleanText}
-      `);
 
       console.log(`[Worker] 🧬 Generating Embedding...`);
-      const embedding = await embedder.embedQuery(cleanText);
+      const embedding = await embedder.embedQuery(textToEmbed);
 
       await itemModel.findByIdAndUpdate(documentId, {
         status: "completed",
-        title: finalTitle, // From the scraper
-        type: aiResult.type, // From Mistral AI
-        summary: aiResult.summary, // From Mistral AI
-        aiTags: aiResult.tags, // From Mistral AI
-        embedding: embedding, // <--- SAVE TO MONGO!
+        title: finalTitle,
+        type: finalType,
+        summary: aiResponse.summary,
+        aiTags: aiResponse.tags,
+        embedding: embedding,
       });
 
-      console.log(`[Worker] ✅ Done`, aiResult.tags);
+      console.log(`[Worker] ✅ Done`, aiResponse.tags);
     } catch (error) {
       console.error(`[Worker] ❌ Error`, error);
 

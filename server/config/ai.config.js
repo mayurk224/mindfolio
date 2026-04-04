@@ -27,8 +27,13 @@ export const embedder = new MistralAIEmbeddings({
   model: "mistral-embed",
 });
 
+export { ChatMistralAI };
+
 // Zod validation schema
-const tagSchema = z.object({
+export const tagSchema = z.object({
+  title: z
+    .string()
+    .describe("A short, descriptive title for the content."),
   summary: z.string().describe("A concise 2-sentence summary of the content."),
   tags: z
     .array(z.string())

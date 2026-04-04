@@ -1,14 +1,13 @@
 import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 
-export default function FileUploadBox() {
+export default function FileUploadBox({ onFileSelect, disabled = false }) {
   const inputRef = useRef(null);
   const [fileName, setFileName] = useState("");
 
   const handleFile = (file) => {
-    if (file) {
-      setFileName(file.name);
-    }
+    setFileName(file ? file.name : "");
+    onFileSelect?.(file || null);
   };
 
   const handleChange = (e) => {
@@ -17,6 +16,7 @@ export default function FileUploadBox() {
 
   const handleDrop = (e) => {
     e.preventDefault();
+    if (disabled) return;
     handleFile(e.dataTransfer.files[0]);
   };
 
@@ -27,13 +27,18 @@ export default function FileUploadBox() {
         type="file"
         className="hidden"
         onChange={handleChange}
+        disabled={disabled}
       />
 
       <div
-        onClick={() => inputRef.current.click()}
+        onClick={() => !disabled && inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-lg p-6 cursor-pointer hover:bg-muted/50 transition"
+        className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-lg p-6 transition ${
+          disabled
+            ? "cursor-not-allowed opacity-70"
+            : "cursor-pointer hover:bg-muted/50"
+        }`}
       >
         <Upload className="w-6 h-6 text-muted-foreground" />
 

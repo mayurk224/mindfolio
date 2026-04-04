@@ -1,60 +1,99 @@
-import { aiQueue, embedder } from "../config/ai.config.js";
+import { embedder } from "../config/ai.config.js";
+import { imagekit } from "../config/imagekit.js";
 import { itemModel } from "../models/item.model.js";
+import { processingQueue } from "../services/queue.js";
+
+const ALLOWED_ITEM_TYPES = [
+  "web",
+  "images",
+  "videos",
+  "documents",
+  "articles",
+  "notes",
+  "youtube",
+  "quotes",
+  "posts",
+  "snippets",
+  "other",
+];
+
+function normalizeString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getRequestedType(value) {
+  return ALLOWED_ITEM_TYPES.includes(value) ? value : "";
+}
+
+function getItemTypeFromMime(mime = "") {
+  if (mime.startsWith("image/")) {
+    return "images";
+  }
+
+  if (mime.startsWith("video/")) {
+    return "videos";
+  }
+
+  if (
+    mime.includes("pdf") ||
+    mime.includes("document") ||
+    mime.includes("word") ||
+    mime.includes("sheet") ||
+    mime.includes("presentation") ||
+    mime.includes("text")
+  ) {
+    return "documents";
+  }
+
+  return "other";
+}
 
 // POST /api/items/manual
-// Route to manually save an item (No AI processing yet)
+// Route to manually save an item and queue it for AI processing
 async function saveManualItem(req, res) {
   try {
-    const { url, title, type, textContent } = req.body;
+    const url = normalizeString(req.body.url);
+    const title = normalizeString(req.body.title);
+    const textContent = normalizeString(req.body.textContent);
+    const requestedType = getRequestedType(req.body.type);
 
-    // 1. Updated Validation: Must have EITHER a URL or Text
     if (!url && !textContent) {
-      return res.status(400).json({
-        message: "Please provide either a URL or text content to save.",
-      });
+      return res
+        .status(400)
+        .json({ message: "A URL or text content is required." });
     }
 
-    // 2. Check for Duplicates (ONLY if a URL is provided)
-    if (url) {
-      const existingItem = await itemModel.findOne({
-        userId: req.userId,
-        url: url,
-      });
-      if (existingItem) {
-        return res
-          .status(409)
-          .json({ message: "You have already saved this link." });
-      }
-    }
+    const itemType = requestedType || (url ? "web" : "notes");
 
-    // 3. Determine the Type automatically if not provided
-    const itemType = type || (url ? "other" : "note");
-
-    // 4. Save to Database
-    const newItem = await itemModel.create({
+    const newItem = new itemModel({
       userId: req.userId,
       url: url || undefined,
-      title: title || (url ? "Processing Link..." : "Untitled Note"),
+      title: title || (url ? "Analyzing Link..." : "Analyzing Note..."),
       type: itemType,
-      textContent: textContent || "",
-      status: "pending", // <--- Changed to pending
+      textContent: textContent || undefined,
+      status: "pending",
     });
 
-    // 2. DROP THE JOB IN THE QUEUE
-    await aiQueue.add("process-item", {
+    await newItem.save();
+
+    await processingQueue.add("process-content", {
       documentId: newItem._id,
-      url: newItem.url,
-      textContent: newItem.textContent,
-      type: newItem.type,
+      url: url || undefined,
+      textContent: textContent || undefined,
+      type: itemType,
+      sourceTitle: title || undefined,
+      sourceType: requestedType || undefined,
     });
 
-    res.status(201).json({
-      message: "Saved successfully!",
+    return res.status(201).json({
+      message: "Item queued for AI processing",
       item: newItem,
     });
   } catch (error) {
     console.error("Error saving item:", error);
-    res.status(500).json({ message: "Server error while saving the item." });
+    return res
+      .status(500)
+      .json({ message: "Server error while saving the item." });
   }
 }
 
@@ -64,6 +103,7 @@ async function getUserItems(req, res) {
   try {
     const items = await itemModel
       .find({ userId: req.userId })
+      .select("+textContent")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -84,7 +124,7 @@ async function getItemStatus(req, res) {
     const item = await itemModel.findOne({
       _id: req.params.id,
       userId: req.userId,
-    });
+    }).select("+textContent");
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
@@ -161,4 +201,73 @@ async function searchItems(req, res) {
   }
 }
 
-export { saveManualItem, getUserItems, getItemStatus, searchItems };
+async function uploadImage(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file provided." });
+    }
+
+    const title = normalizeString(req.body.title);
+    const textContent = normalizeString(req.body.textContent);
+    const requestedType = getRequestedType(req.body.type);
+
+    console.log(`[Upload] Receiving file: ${req.file.originalname}`);
+
+    // 1. Categorize the upload from its MIME type, but allow a valid
+    // manually selected type to override the final saved type.
+    const detectedType = getItemTypeFromMime(req.file.mimetype);
+    const itemType = requestedType || detectedType;
+    const shouldQueueForAi = detectedType === "images";
+
+    // 2. Upload to ImageKit (It accepts all files!)
+    const imageKitResponse = await imagekit.upload({
+      file: req.file.buffer,
+      fileName: req.file.originalname,
+      folder: `/mindfolio-uploads/${detectedType}`,
+    });
+
+    console.log(`[Upload] Success! File URL: ${imageKitResponse.url}`);
+
+    // 3. Create the item in MongoDB.
+    const newItem = new itemModel({
+      userId: req.userId,
+      title:
+        title ||
+        (shouldQueueForAi ? `Analyzing ${itemType}...` : req.file.originalname),
+      type: itemType,
+      url: imageKitResponse.url,
+      thumbnailUrl:
+        detectedType === "images"
+          ? imageKitResponse.thumbnailUrl || imageKitResponse.url
+          : undefined,
+      textContent: textContent || undefined,
+      status: shouldQueueForAi ? "pending" : "completed",
+    });
+
+    await newItem.save();
+
+    // 4. Only image uploads go through the current AI pipeline.
+    if (shouldQueueForAi) {
+      await processingQueue.add("process-content", {
+        documentId: newItem._id,
+        url: imageKitResponse.url,
+        textContent: textContent || undefined,
+        type: itemType,
+        sourceTitle: title || undefined,
+        sourceType: requestedType || undefined,
+      });
+    }
+
+    res.status(201).json({
+      message: shouldQueueForAi
+        ? "File uploaded and queued for AI analysis!"
+        : "File uploaded successfully!",
+      item: newItem,
+    });
+  } catch (error) {
+    console.error("File upload failed:", error);
+    res.status(500).json({ message: "Failed to upload file." });
+  }
+}
+
+export { saveManualItem, getUserItems, getItemStatus, searchItems, uploadImage };

@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { saveItemToDB, getItemsFromDB } from "@/services/itemService";
+import {
+  saveItemToDB,
+  getItemsFromDB,
+  uploadItemToDB,
+} from "@/services/itemService";
 
 export const useItem = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +25,27 @@ export const useItem = () => {
       return { success: true, item: data.item, data };
     } catch (err) {
       console.error("Save Item Error:", err);
+      setIsLoading(false);
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const uploadItem = async (file, itemData = {}) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await uploadItemToDB(file, itemData);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to upload item.");
+      }
+
+      setIsLoading(false);
+      return { success: true, item: data.item, data };
+    } catch (err) {
+      console.error("Upload Item Error:", err);
       setIsLoading(false);
       setError(err.message);
       return { success: false, error: err.message };
@@ -49,5 +74,5 @@ export const useItem = () => {
     }
   };
 
-  return { saveItem, fetchItems, items, isLoading, error };
+  return { saveItem, uploadItem, fetchItems, items, isLoading, error };
 };

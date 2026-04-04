@@ -15,6 +15,25 @@ export const saveItemToDB = async (itemData) => {
   return response;
 };
 
+export const uploadItemToDB = async (file, itemData = {}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  Object.entries(itemData).forEach(([key, value]) => {
+    if (typeof value === "string" && value.trim()) {
+      formData.append(key, value.trim());
+    }
+  });
+
+  const response = await fetch(`${API_URL}/upload`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  return response;
+};
+
 export const getItemsFromDB = async () => {
   const response = await fetch(`${API_URL}/`, {
     method: "GET",
