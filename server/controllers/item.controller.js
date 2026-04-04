@@ -217,7 +217,7 @@ async function uploadImage(req, res) {
     // manually selected type to override the final saved type.
     const detectedType = getItemTypeFromMime(req.file.mimetype);
     const itemType = requestedType || detectedType;
-    const shouldQueueForAi = detectedType === "images";
+    const shouldQueueForAi = detectedType === "images" || detectedType === "documents";
 
     // 2. Upload to ImageKit (It accepts all files!)
     const imageKitResponse = await imagekit.upload({
@@ -246,7 +246,7 @@ async function uploadImage(req, res) {
 
     await newItem.save();
 
-    // 4. Only image uploads go through the current AI pipeline.
+    // 4. Image and document uploads go through the AI pipeline.
     if (shouldQueueForAi) {
       await processingQueue.add("process-content", {
         documentId: newItem._id,

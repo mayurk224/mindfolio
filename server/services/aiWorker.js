@@ -1,8 +1,6 @@
 import { HumanMessage } from "@langchain/core/messages";
 import { Worker } from "bullmq";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+import { PDFParse } from "pdf-parse";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import { itemModel } from "../models/item.model.js";
@@ -76,9 +74,11 @@ export const aiWorker = new Worker(
         const buffer = Buffer.from(arrayBuffer);
 
         let extractedText = "";
-        if (url.toLowerCase().endsWith(".pdf")) {
-          const pdfData = await pdfParse(buffer);
+        if (url.toLowerCase().split('?')[0].endsWith(".pdf")) {
+          const parser = new PDFParse({ data: buffer });
+          const pdfData = await parser.getText();
           extractedText = pdfData.text;
+          await parser.destroy();
         } else {
           // Fallback for .txt, .md, etc.
           extractedText = buffer.toString("utf-8");
