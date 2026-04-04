@@ -11,8 +11,22 @@ import MediaCard from "./MediaCard";
 import ItemDetailModal from "./ItemDetailModal";
 import { cn } from "@/lib/utils";
 
-export default function TimelineSection({ items = [], isLoading = false }) {
+export default function TimelineSection({
+  items = [],
+  isLoading = false,
+  onItemUpdate,
+}) {
   const [selectedItem, setSelectedItem] = useState(null);
+
+  // Keep selectedItem in sync if the item in the list is updated
+  useEffect(() => {
+    if (selectedItem) {
+      const updatedItem = items.find((i) => i._id === selectedItem._id);
+      if (updatedItem && updatedItem !== selectedItem) {
+        setSelectedItem(updatedItem);
+      }
+    }
+  }, [items, selectedItem]);
 
   if (isLoading) {
     return (
@@ -105,6 +119,7 @@ export default function TimelineSection({ items = [], isLoading = false }) {
                       >
                         <MediaCard
                           item={item}
+                          onItemUpdate={onItemUpdate}
                           className={cn(
                             !item.thumbnailUrl && "aspect-auto",
                             selectedItem?._id === item._id &&

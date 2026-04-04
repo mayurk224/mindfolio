@@ -7,12 +7,14 @@ import {
   FileCode,
   Globe,
   Image,
+  Loader2,
   Newspaper,
   NotebookPen,
   Play,
   Quote,
   Search,
   Video,
+  X,
 } from "lucide-react";
 
 const tabs = [
@@ -28,26 +30,45 @@ const tabs = [
   { id: "snippets", label: "Snippets", icon: FileCode },
 ];
 
-const SearchNavbar = ({ className }) => {
+const SearchNavbar = ({
+  searchQuery,
+  setSearchQuery,
+  handleSearch,
+  isSearching,
+  clearSearch,
+  className,
+}) => {
   const [activeTab, setActiveTab] = useState("web");
-  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className={cn("flex w-full flex-col gap-2", className)}>
       {/* Search Input Section */}
-      <div className="relative group">
+      <form onSubmit={handleSearch} className="relative group">
         <div className="absolute inset-y-0 left-0 flex items-center pl-1 pointer-events-none">
-          <Search className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground/50 group-focus-within:text-primary transition-colors duration-300" />
+          {isSearching ? (
+            <Loader2 className="h-6 w-6 md:h-8 md:w-8 text-primary animate-spin" />
+          ) : (
+            <Search className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground/50 group-focus-within:text-primary transition-colors duration-300" />
+          )}
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search my mind..."
-          className="w-full bg-transparent pl-10 md:pl-12 pr-4 py-2 text-2xl md:text-4xl italic font-light text-foreground placeholder:text-muted-foreground focus:outline-none border-b border-transparent focus:border-border transition-all duration-300"
+          className="w-full bg-transparent pl-10 md:pl-12 pr-10 md:pr-12 py-2 text-2xl md:text-4xl italic font-light text-foreground placeholder:text-muted-foreground focus:outline-none border-b border-transparent focus:border-border transition-all duration-300"
         />
+        {searchQuery && !isSearching && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="absolute inset-y-0 right-0 flex items-center pr-1 text-muted-foreground/50 hover:text-foreground transition-colors"
+          >
+            <X className="h-6 w-6 md:h-8 md:w-8" />
+          </button>
+        )}
         <div className="absolute bottom-0 left-0 w-0 h-px bg-primary group-focus-within:w-full transition-all duration-500" />
-      </div>
+      </form>
 
       {/* Tabs Section */}
       <div className="flex w-full items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 touch-pan-x">

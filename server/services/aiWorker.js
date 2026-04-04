@@ -55,6 +55,7 @@ export const aiWorker = new Worker(
 
       const aiResult = await structuredLlm.invoke(`
         Analyze the following text and extract the required information.
+        CRITICAL: You MUST return a maximum of 6 tags. Do not exceed this limit under any circumstances.
         TEXT:
         ${cleanText}
       `);

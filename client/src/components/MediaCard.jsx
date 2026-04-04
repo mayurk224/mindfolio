@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { Newspaper, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function MediaCard({ item: initialItem, className }) {
+export default function MediaCard({
+  item: initialItem,
+  className,
+  onItemUpdate,
+}) {
   const [item, setItem] = useState(initialItem);
   const hasImage = !!item.thumbnailUrl;
   const isProcessing =
@@ -13,7 +17,6 @@ export default function MediaCard({ item: initialItem, className }) {
 
     const pollInterval = setInterval(async () => {
       try {
-        const token = localStorage.getItem("token");
         const API_URL = import.meta.env.VITE_API_URL
           ? `${import.meta.env.VITE_API_URL}/items`
           : "http://localhost:8000/api/items";
@@ -21,8 +24,6 @@ export default function MediaCard({ item: initialItem, className }) {
         const response = await fetch(`${API_URL}/${item._id}`, {
           credentials: "include",
           headers: {
-            ...(token &&
-              token !== "null" && { Authorization: `Bearer ${token}` }),
             "Content-Type": "application/json",
           },
         });
@@ -30,6 +31,11 @@ export default function MediaCard({ item: initialItem, className }) {
         if (response.ok) {
           const updatedItem = await response.json();
           setItem(updatedItem);
+
+          // Sync back to the list in Home.jsx so the modal (and other cards) stay updated
+          if (onItemUpdate) {
+            onItemUpdate(updatedItem);
+          }
 
           if (
             updatedItem.status === "completed" ||

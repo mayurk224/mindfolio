@@ -21,6 +21,8 @@ import PopoverForm from "@/components/PopoverForm";
 const Home = () => {
   const [items, setItems] = useState([]);
   const { fetchItems, isLoading } = useItem();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const getInitialItems = async () => {
@@ -39,6 +41,55 @@ const Home = () => {
     setItems((prev) => [newItem, ...prev]);
   };
 
+  const handleItemUpdated = (updatedItem) => {
+    setItems((prev) =>
+      prev.map((item) => (item._id === updatedItem._id ? updatedItem : item)),
+    );
+  };
+
+  // 1. Your existing fetch function (make sure it's reusable like this)
+
+  // 2. The NEW AI Vector Search function
+  const handleSearch = async (e) => {
+    e.preventDefault(); // Stop page reload
+
+    // If the search bar is empty, just grab the normal timeline
+    if (!searchQuery.trim()) {
+      const result = await fetchItems();
+      if (result.success) setItems(result.items || []);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const baseUrl =
+        import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+      // Notice we use encodeURIComponent to safely pass spaces and symbols in the URL
+      const response = await fetch(
+        `${baseUrl}/items/search?q=${encodeURIComponent(searchQuery)}`,
+        {
+          credentials: "include",
+        },
+      );
+
+      if (response.ok) {
+        const searchResults = await response.json();
+        setItems(searchResults); // Instantly replaces the timeline with search results!
+      }
+    } catch (error) {
+      console.error("Search failed", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // 3. A quick helper to clear the search
+  const clearSearch = async () => {
+    setSearchQuery("");
+    const result = await fetchItems();
+    if (result.success) setItems(result.items || []);
+  };
+
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -51,12 +102,23 @@ const Home = () => {
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4 hidden md:block"
             />
-            <SearchNavbar className="flex-1" />
+            <SearchNavbar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              handleSearch={handleSearch}
+              isSearching={isSearching}
+              clearSearch={clearSearch}
+              className="flex-1"
+            />
           </div>
         </header>
 
         <div className="p-4">
-          <TimelineSection items={items} isLoading={isLoading} />
+          <TimelineSection
+            items={items}
+            isLoading={isLoading}
+            onItemUpdate={handleItemUpdated}
+          />
         </div>
 
         <div className="fixed bottom-5 right-5 z-50">

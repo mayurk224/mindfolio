@@ -1,4 +1,4 @@
-import { aiQueue } from "../config/ai.config.js";
+import { aiQueue, embedder } from "../config/ai.config.js";
 import { itemModel } from "../models/item.model.js";
 
 // POST /api/items/manual
@@ -97,4 +97,68 @@ async function getItemStatus(req, res) {
   }
 }
 
-export { saveManualItem, getUserItems, getItemStatus };
+async function searchItems(req, res) {
+  try {
+    const queryText = req.query.q;
+    if (!queryText) {
+      return res.status(400).json({ message: "Search query is required." });
+    }
+
+    // 1. Generate query embedding (Mistral AI Call)
+    const queryEmbedding = await embedder.embedQuery(queryText);
+
+    // 2. Perform Hybrid Search: Keyword (Regex) + Vector Search concurrently
+    const [keywordResults, vectorResults] = await Promise.all([
+      // Keyword search on title, summary, or aiTags
+      itemModel
+        .find({
+          userId: req.userId,
+          $or: [
+            { title: { $regex: queryText, $options: "i" } },
+            { summary: { $regex: queryText, $options: "i" } },
+            { aiTags: { $regex: queryText, $options: "i" } },
+          ],
+        })
+        .select("-embedding")
+        .limit(10)
+        .lean(),
+
+      // Semantic/Vector search
+      itemModel.aggregate([
+        {
+          $vectorSearch: {
+            index: "vector_index",
+            path: "embedding",
+            queryVector: queryEmbedding,
+            numCandidates: 100,
+            limit: 10,
+            filter: { userId: req.userId },
+          },
+        },
+        {
+          $project: {
+            embedding: 0,
+            score: { $meta: "vectorSearchScore" },
+          },
+        },
+      ]),
+    ]);
+
+    // 3. Combine both result arrays
+    const combinedResults = [...keywordResults, ...vectorResults];
+
+    // 4. Deduplicate the combinedResults array based on the `_id` field
+    const deduplicatedResults = Array.from(
+      new Map(
+        combinedResults.map((item) => [item._id.toString(), item]),
+      ).values(),
+    );
+
+    res.status(200).json(deduplicatedResults);
+  } catch (error) {
+    console.error("Hybrid search failed:", error);
+    res.status(500).json({ message: "Search engine failed." });
+  }
+}
+
+export { saveManualItem, getUserItems, getItemStatus, searchItems };

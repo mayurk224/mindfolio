@@ -27,16 +27,16 @@ export const embedder = new MistralAIEmbeddings({
   model: "mistral-embed",
 });
 
-// Schema
-// Inside services/aiWorker.js
-
+// Zod validation schema
 const tagSchema = z.object({
   summary: z.string().describe("A concise 2-sentence summary of the content."),
   tags: z
     .array(z.string())
     .max(6)
-    .min(4)
-    .describe("An array of 4 to 6 highly relevant tags/keywords."),
+    .min(3)
+    .describe(
+      "An array of relevant keywords. CRITICAL: You MUST return a maximum of 6 tags. Do not exceed 6 tags under any circumstances.",
+    ),
 
   // NEW: Let the AI figure out what kind of content this is!
   type: z
@@ -53,7 +53,9 @@ const tagSchema = z.object({
       "snippets",
       "other",
     ])
-    .describe("Categorize the type of content based on the text provided."),
+    .describe(
+      "Categorize the content. CRITICAL: If the content is a news story, press release, or blog, you MUST classify it as 'articles'.",
+    ),
 });
 
 // Structured output
