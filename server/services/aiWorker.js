@@ -166,7 +166,8 @@ async function extractYouTubeMetadata(rawUrl) {
 export const aiWorker = new Worker(
   "content-processing",
   async (job) => {
-    const { documentId, url, textContent, sourceTitle, sourceType } = job.data;
+    const { documentId, url, sourceLink, textContent, sourceTitle, sourceType } =
+      job.data;
 
     console.log(`[Worker] 🚀 Processing: ${documentId}`);
 
@@ -182,7 +183,7 @@ export const aiWorker = new Worker(
       let finalAuthor = "";
       let finalThumbnailUrl = "";
       let finalUrl = undefined;
-      let finalSourceLink = undefined;
+      let finalSourceLink = sourceLink || undefined;
 
       if (job.data.type === "images") {
         console.log(`[Worker] 👁️ Analyzing Image: ${url}`);

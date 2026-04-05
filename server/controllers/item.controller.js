@@ -102,7 +102,12 @@ async function saveManualItem(req, res) {
     const requestedType = getRequestedType(req.body.type);
 
     // Resolve the URL from various possible frontend/extension payloads
-    let url = resourceUrl || pageUrl || legacyUrl;
+    // Primary URL is the direct resource (image/video) if available, else page URL
+    const url = resourceUrl || pageUrl || legacyUrl;
+
+    // Source Link is the page where it was found, only if a different resource URL was provided
+    const sourceLink =
+      resourceUrl && pageUrl && resourceUrl !== pageUrl ? pageUrl : undefined;
 
     if (!url && !textContent) {
       return res
@@ -137,6 +142,7 @@ async function saveManualItem(req, res) {
     const newItem = new itemModel({
       userId: req.userId,
       url: finalUrl,
+      sourceLink: sourceLink || undefined, // Save the original source page URL
       title: title || (finalUrl ? "Analyzing Link..." : "Untitled Note"),
       type: itemType,
       thumbnailUrl: itemType === "images" ? finalUrl : undefined,
@@ -154,6 +160,7 @@ async function saveManualItem(req, res) {
       await processingQueue.add("process-content", {
         documentId: newItem._id,
         url: finalUrl || undefined,
+        sourceLink: newItem.sourceLink || undefined,
         textContent: textContent || undefined,
         type: itemType,
         sourceTitle: title || undefined,
