@@ -136,26 +136,31 @@ async function saveManualItem(req, res) {
     const newItem = new itemModel({
       userId: req.userId,
       url: finalUrl,
-      title: title || (finalUrl ? "Analyzing Link..." : "Analyzing Note..."),
+      title: title || (finalUrl ? "Analyzing Link..." : "Untitled Note"),
       type: itemType,
       thumbnailUrl: itemType === "images" ? finalUrl : undefined,
       textContent: textContent || undefined,
-      status: "pending",
+      status: itemType === "notes" ? "completed" : "pending",
     });
 
     await newItem.save();
 
-    await processingQueue.add("process-content", {
-      documentId: newItem._id,
-      url: finalUrl || undefined,
-      textContent: textContent || undefined,
-      type: itemType,
-      sourceTitle: title || undefined,
-      sourceType: requestedType || undefined,
-    });
+    // Skip AI processing for notes — they're already complete as-is
+    if (itemType !== "notes") {
+      await processingQueue.add("process-content", {
+        documentId: newItem._id,
+        url: finalUrl || undefined,
+        textContent: textContent || undefined,
+        type: itemType,
+        sourceTitle: title || undefined,
+        sourceType: requestedType || undefined,
+      });
+    }
 
     return res.status(201).json({
-      message: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} queued for AI processing`,
+      message: itemType === "notes"
+        ? "Note saved successfully"
+        : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} queued for AI processing`,
       item: newItem,
     });
   } catch (error) {

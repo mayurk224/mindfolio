@@ -12,17 +12,23 @@ import {
 function getTypeIcon(type, className) {
   const props = { className: className ?? "h-4 w-4" };
   switch (type) {
-    case "images":   return <ImageIcon {...props} />;
-    case "videos":   return <Video {...props} />;
-    case "posts":    return <Newspaper {...props} />;
-    case "articles": return <FileText {...props} />;
-    case "notes":    return <NotebookPen {...props} />;
-    case "links":    return <Link2 {...props} />;
-    default:         return <Newspaper {...props} />;
+    case "images":
+      return <ImageIcon {...props} />;
+    case "videos":
+      return <Video {...props} />;
+    case "posts":
+      return <Newspaper {...props} />;
+    case "articles":
+      return <FileText {...props} />;
+    case "notes":
+      return <NotebookPen {...props} />;
+    case "links":
+      return <Link2 {...props} />;
+    default:
+      return <Newspaper {...props} />;
   }
 }
 import { cn } from "@/lib/utils";
-import { InstagramFreeIcons } from "@hugeicons/core-free-icons/index";
 import InstaSmallEmbed from "./InstaSmallEmbed";
 import { Button } from "./ui/button";
 
@@ -153,7 +159,7 @@ export default function MediaCard({
       )}
 
       {/* ✅ Fallback Content (when no preview) */}
-      {!hasPreview && (
+      {!hasPreview && item.type !== "notes" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-4 transition-opacity duration-300 group-hover:opacity-0">
           <div className="flex items-center justify-center p-4 rounded-full bg-muted border border-border">
             {isProcessing ? (
@@ -173,45 +179,67 @@ export default function MediaCard({
         </div>
       )}
 
-      {/* Hover Overlay (same as before) */}
-      <div className="absolute inset-0 z-10 bg-linear-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
-        <div className="mb-4">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2 opacity-100 flex items-center gap-2">
-            {item.type}
-            {isProcessing && (
-              <span className="flex items-center gap-1 text-white/50 lowercase animate-pulse italic">
-                <span className="h-1 w-1 rounded-full bg-white/50" />
-                processing...
-              </span>
-            )}
-          </span>
-
-          <h3 className="text-lg font-semibold text-white leading-tight line-clamp-2">
+      {/* 📝 Notes Preview */}
+      {item.type === "notes" && (
+        <div className="absolute inset-0 flex flex-col gap-3 p-5 overflow-hidden">
+          <div className="flex items-center gap-2 mb-1">
+            {getTypeIcon(item.type, "h-4 w-4 text-primary")}
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+              Note
+            </span>
+          </div>
+          <h3 className="text-base font-bold text-foreground leading-snug line-clamp-2">
             {item.title}
           </h3>
+          {item.textContent && (
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-8 whitespace-pre-line">
+              {item.textContent}
+            </p>
+          )}
         </div>
+      )}
 
-        {item.summary && (
-          <p className="text-xs text-white/70 line-clamp-3 mb-4 leading-relaxed">
-            {item.summary}
-          </p>
-        )}
+      {/* Hover Overlay (hidden for notes) */}
+      {item.type !== "notes" && (
+        <div className="absolute inset-0 z-10 bg-linear-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+          <div className="mb-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2 opacity-100 flex items-center gap-2">
+              {item.type}
+              {isProcessing && (
+                <span className="flex items-center gap-1 text-white/50 lowercase animate-pulse italic">
+                  <span className="h-1 w-1 rounded-full bg-white/50" />
+                  processing...
+                </span>
+              )}
+            </span>
 
-        {item.aiTags && item.aiTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {item.aiTags.slice(0, 3).map((tag, i) => (
-              <span
-                key={i}
-                className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[9px] text-white/90 font-medium whitespace-nowrap"
-              >
-                {tag}
-              </span>
-            ))}
+            <h3 className="text-lg font-semibold text-white leading-tight line-clamp-2">
+              {item.title}
+            </h3>
           </div>
-        )}
 
-        <div className="h-1 w-0 bg-primary group-hover:w-full transition-all duration-700 ease-in-out rounded-full" />
-      </div>
+          {item.summary && (
+            <p className="text-xs text-white/70 line-clamp-3 mb-4 leading-relaxed">
+              {item.summary}
+            </p>
+          )}
+
+          {item.aiTags && item.aiTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {item.aiTags.slice(0, 3).map((tag, i) => (
+                <span
+                  key={i}
+                  className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[9px] text-white/90 font-medium whitespace-nowrap"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="h-1 w-0 bg-primary group-hover:w-full transition-all duration-700 ease-in-out rounded-full" />
+        </div>
+      )}
 
       {/* Bottom gradient (only when preview exists) */}
       {hasPreview && (
