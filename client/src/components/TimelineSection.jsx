@@ -86,9 +86,9 @@ export default function TimelineSection({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-full hover:bg-secondary/50 transition-all data-[state=open]:rotate-180"
+                className="h-9 w-9 rounded-full hover:bg-secondary/50 transition-all"
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronDown className="h-5 w-5 transition-transform duration-300 data-[state=open]:rotate-180" />
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -100,7 +100,7 @@ export default function TimelineSection({
               .map(([dayKey, dayItems]) => (
                 <div key={dayKey} className="flex flex-col gap-4">
                   {/* Day Header */}
-                  <h3 className="text-sm font-semibold text-muted-foreground/80 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                     {new Date(dayKey).toLocaleDateString("en-IN", {
                       weekday: "short",

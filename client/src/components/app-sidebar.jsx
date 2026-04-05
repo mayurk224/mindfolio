@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react";
 
-import { NavUser } from "@/components/nav-user"
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -11,74 +11,61 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { InboxIcon, FileIcon, SentIcon, ArchiveIcon, Delete02Icon, CommandIcon } from "@hugeicons/core-free-icons"
-import { useAuthContext } from "@/context/AuthContext"
+} from "@/components/ui/sidebar";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  InboxIcon,
+  FileIcon,
+  SentIcon,
+  ArchiveIcon,
+  Delete02Icon,
+  CommandIcon,
+} from "@hugeicons/core-free-icons";
+import { useAuthContext } from "@/context/AuthContext";
+import { Box, LayoutPanelLeft, Trash } from "lucide-react";
 
 // This is sample data
 const data = {
   navMain: [
     {
-      title: "Inbox",
+      title: "Home",
       url: "#",
-      icon: (
-        <HugeiconsIcon icon={InboxIcon} strokeWidth={2} />
-      ),
+      icon: <LayoutPanelLeft strokeWidth={2} />,
       isActive: true,
     },
     {
-      title: "Drafts",
+      title: "Collection",
       url: "#",
-      icon: (
-        <HugeiconsIcon icon={FileIcon} strokeWidth={2} />
-      ),
-      isActive: false,
-    },
-    {
-      title: "Sent",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={SentIcon} strokeWidth={2} />
-      ),
-      isActive: false,
-    },
-    {
-      title: "Junk",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={ArchiveIcon} strokeWidth={2} />
-      ),
+      icon: <Box strokeWidth={2} />,
       isActive: false,
     },
     {
       title: "Trash",
       url: "#",
-      icon: (
-        <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
-      ),
+      icon: <Trash strokeWidth={2} />,
       isActive: false,
     },
   ],
-}
-export function AppSidebar({
-  ...props
-}) {
-  const { user } = useAuthContext()
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
+};
+export function AppSidebar({ ...props }) {
+  const { user } = useAuthContext();
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="md:h-8 md:p-0" render={<a href="#" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <HugeiconsIcon icon={CommandIcon} strokeWidth={2} className="size-4" />
+            <SidebarMenuButton
+              size="lg"
+              className="md:h-8 md:p-0"
+              render={<a href="#" />}
+            >
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
+                <img src="/mindfolio.png" alt="" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Acme Inc</span>
-                <span className="truncate text-xs">Enterprise</span>
+              <div className="grid flex-1 text-left leading-tight">
+                <h1 className="truncate font-semibold text-md">MindFolio</h1>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -105,7 +92,11 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user || { name: "Guest", email: "guest@example.com", avatar: "" }} />
+        <NavUser
+          user={
+            user || { name: "Guest", email: "guest@example.com", avatar: "" }
+          }
+        />
       </SidebarFooter>
     </Sidebar>
   );

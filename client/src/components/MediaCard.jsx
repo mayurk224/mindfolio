@@ -1,5 +1,26 @@
 import { useState, useEffect } from "react";
-import { Newspaper, Loader2 } from "lucide-react";
+import {
+  ImageIcon,
+  Video,
+  FileText,
+  NotebookPen,
+  Link2,
+  Newspaper,
+  Loader2,
+} from "lucide-react";
+
+function getTypeIcon(type, className) {
+  const props = { className: className ?? "h-4 w-4" };
+  switch (type) {
+    case "images":   return <ImageIcon {...props} />;
+    case "videos":   return <Video {...props} />;
+    case "posts":    return <Newspaper {...props} />;
+    case "articles": return <FileText {...props} />;
+    case "notes":    return <NotebookPen {...props} />;
+    case "links":    return <Link2 {...props} />;
+    default:         return <Newspaper {...props} />;
+  }
+}
 import { cn } from "@/lib/utils";
 import { InstagramFreeIcons } from "@hugeicons/core-free-icons/index";
 import InstaSmallEmbed from "./InstaSmallEmbed";
@@ -126,7 +147,7 @@ export default function MediaCard({
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Newspaper className="h-4 w-4" />
+            getTypeIcon(item.type, "h-4 w-4")
           )}
         </div>
       )}
@@ -138,7 +159,7 @@ export default function MediaCard({
             {isProcessing ? (
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             ) : (
-              <Newspaper className="h-6 w-6 text-muted-foreground" />
+              getTypeIcon(item.type, "h-6 w-6 text-muted-foreground")
             )}
           </div>
 

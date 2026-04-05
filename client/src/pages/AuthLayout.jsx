@@ -58,12 +58,12 @@ export function AuthLayout({
                   href="#"
                   className="flex flex-col items-center gap-2 font-medium"
                 >
-                  <div className="flex size-8 items-center justify-center rounded-md">
-                    <GalleryVerticalEnd className="size-6" />
+                  <div className="flex items-center justify-center rounded-md">
+                    <img src="/mindfolio.png" alt="" className="size-12" />
                   </div>
-                  <span className="sr-only">Acme Inc.</span>
+                  <span className="sr-only">MindFolio</span>
                 </a>
-                <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
+                <h1 className="text-xl font-bold">Welcome to MindFolio</h1>
                 {isLogin ? (
                   <FieldDescription>
                     Don&apos;t have an account?{" "}

@@ -4,6 +4,7 @@ import LegalPrivacy from "./pages/LegalPrivacy";
 import { AuthLayout } from "./pages/AuthLayout";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
   {
     path: "/signup",
     element: <AuthLayout />,
+  },
+  {
+    path: "/landing",
+    element: <Landing />,
   },
   {
     path: "/terms",

@@ -56,7 +56,7 @@ const SearchNavbar = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search my mind..."
-          className="w-full bg-transparent pl-10 md:pl-12 pr-10 md:pr-12 py-2 text-2xl md:text-4xl italic font-light text-foreground placeholder:text-muted-foreground focus:outline-none border-b border-transparent focus:border-border transition-all duration-300"
+          className="w-full bg-transparent pl-10 md:pl-12 pr-10 md:pr-12 py-2 text-2xl md:text-4xl font-light text-foreground placeholder:text-muted-foreground focus:outline-none border-b border-transparent focus:border-border transition-all duration-300"
         />
         {searchQuery && !isSearching && (
           <button
