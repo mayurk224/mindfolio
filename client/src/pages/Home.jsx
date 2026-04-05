@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+import { useAuthContext } from "@/context/AuthContext";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -21,9 +23,38 @@ import PopoverForm from "@/components/PopoverForm";
 const Home = () => {
   const [items, setItems] = useState([]);
   const { fetchItems, isLoading } = useItem();
+  const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+
+  useEffect(() => {
+    if (!user?._id) return;
+
+    const socketUrl = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:8000";
+    const socket = io(socketUrl, {
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      console.log("Connected to socket:", socket.id);
+      socket.emit("join-room", user._id);
+    });
+
+    socket.on("new-item", (newItem) => {
+      console.log("Received new-item via socket:", newItem);
+      setItems((prev) => {
+        // Prevent duplicate if already added via manual UI
+        const exists = prev.some((item) => item._id === newItem._id);
+        if (exists) return prev;
+        return [newItem, ...prev];
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user?._id]);
 
   useEffect(() => {
     const getInitialItems = async () => {

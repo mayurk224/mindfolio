@@ -2,6 +2,7 @@ import { embedder } from "../config/ai.config.js";
 import { imagekit } from "../config/imagekit.js";
 import { itemModel } from "../models/item.model.js";
 import { processingQueue } from "../services/queue.js";
+import { emitToUser } from "../services/socket.js";
 
 const ALLOWED_ITEM_TYPES = [
   "web",
@@ -144,6 +145,9 @@ async function saveManualItem(req, res) {
     });
 
     await newItem.save();
+
+    // Emit real-time event to the user
+    emitToUser(req.userId, "new-item", newItem);
 
     // Skip AI processing for notes — they're already complete as-is
     if (itemType !== "notes") {
@@ -332,6 +336,9 @@ async function uploadImage(req, res) {
     });
 
     await newItem.save();
+
+    // Emit real-time event to the user
+    emitToUser(req.userId, "new-item", newItem);
 
     // 4. Image and document uploads go through the AI pipeline.
     if (shouldQueueForAi) {
