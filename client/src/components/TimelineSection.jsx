@@ -15,6 +15,7 @@ export default function TimelineSection({
   items = [],
   isLoading = false,
   onItemUpdate,
+  onItemDelete,
 }) {
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -139,6 +140,10 @@ export default function TimelineSection({
         item={selectedItem}
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
+        onDelete={(deletedId) => {
+          setSelectedItem(null);
+          onItemDelete?.(deletedId);
+        }}
       />
     </div>
   );

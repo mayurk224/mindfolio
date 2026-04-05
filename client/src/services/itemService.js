@@ -34,6 +34,18 @@ export const uploadItemToDB = async (file, itemData = {}) => {
   return response;
 };
 
+export const softDeleteItem = async (itemId) => {
+  const response = await fetch(`${API_URL}/${itemId}/delete`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response;
+};
+
 export const getItemsFromDB = async () => {
   const response = await fetch(`${API_URL}/`, {
     method: "GET",

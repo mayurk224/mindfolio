@@ -48,6 +48,10 @@ const Home = () => {
     );
   };
 
+  const handleItemDeleted = (deletedId) => {
+    setItems((prev) => prev.filter((item) => item._id !== deletedId));
+  };
+
   // 1. Your existing fetch function (make sure it's reusable like this)
 
   // 2. The NEW AI Vector Search function
@@ -126,6 +130,7 @@ const Home = () => {
             items={filteredItems}
             isLoading={isLoading}
             onItemUpdate={handleItemUpdated}
+            onItemDelete={handleItemDeleted}
           />
         </div>
 

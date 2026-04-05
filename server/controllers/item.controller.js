@@ -180,7 +180,7 @@ async function saveManualItem(req, res) {
 async function getUserItems(req, res) {
   try {
     const items = await itemModel
-      .find({ userId: req.userId })
+      .find({ userId: req.userId, isDeleted: { $ne: true } })
       .select("+textContent")
       .sort({ createdAt: -1 });
 
@@ -356,10 +356,32 @@ async function uploadImage(req, res) {
   }
 }
 
+// PATCH /api/items/:id/delete
+// Soft-delete an item (marks it as deleted without removing it from the DB)
+async function softDeleteItem(req, res) {
+  try {
+    const item = await itemModel.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { isDeleted: true },
+      { new: true },
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found." });
+    }
+
+    return res.status(200).json({ message: "Item deleted.", item });
+  } catch (error) {
+    console.error("Error soft-deleting item:", error);
+    return res.status(500).json({ message: "Server error while deleting the item." });
+  }
+}
+
 export {
   saveManualItem,
   getUserItems,
   getItemStatus,
   searchItems,
   uploadImage,
+  softDeleteItem,
 };

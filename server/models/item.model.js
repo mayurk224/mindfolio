@@ -76,6 +76,11 @@ const itemSchema = new mongoose.Schema(
     userNotes: {
       type: String, // If the user wants to add their own thoughts
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true, // Quickly filter out deleted items
+    },
   },
   {
     timestamps: true,

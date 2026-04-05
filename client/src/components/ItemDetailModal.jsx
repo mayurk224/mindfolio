@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import InstaEmbed from "./InstaEmbed";
+import { softDeleteItem } from "@/services/itemService";
 
 const TYPE_LABELS = {
   web: "Web App",
@@ -116,7 +117,7 @@ function TagPill({ children }) {
   );
 }
 
-export default function ItemDetailModal({ item, isOpen, onClose }) {
+export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState([]);
   const [title, setTitle] = useState("");
@@ -222,8 +223,19 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
     setIsFavorite((currentValue) => !currentValue);
   };
 
-  const handleDelete = () => {
-    toast("Delete is not wired up yet.");
+  const handleDelete = async () => {
+    try {
+      const response = await softDeleteItem(item._id);
+      if (!response.ok) {
+        toast.error("Could not delete this item. Please try again.");
+        return;
+      }
+      toast.success("Item moved to trash.");
+      onClose();
+      onDelete?.(item._id);
+    } catch {
+      toast.error("Something went wrong while deleting.");
+    }
   };
 
   return (
