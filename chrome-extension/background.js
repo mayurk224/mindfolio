@@ -1,8 +1,8 @@
 import { checkAuthentication } from "./utils/auth.js";
 import { EXTENSION_CONFIG, sendPayloadToBackend } from "./utils/api.js";
 
-const MENU_ID = "mindfolio-send-to-backend";
-const MENU_TITLE = "Send to Backend";
+const MENU_ID = "mindfolio-send-to-mindfolio";
+const MENU_TITLE = "Send to MindFolio";
 
 function createContextMenu() {
   chrome.contextMenus.removeAll(() => {

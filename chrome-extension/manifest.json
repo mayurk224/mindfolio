@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Mindfolio Context Sender",
+  "name": "Mindfolio",
   "version": "1.0.0",
-  "description": "Send webpages, images, videos, and YouTube links to the Mindfolio backend from the right-click menu.",
+  "description": "Save webpages, images, videos, and YouTube links to your Mindfolio second brain.",
   "permissions": ["contextMenus", "activeTab", "scripting", "tabs"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -15,5 +15,21 @@
       "js": ["content.js"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Mindfolio",
+    "default_icon": {
+      "16": "mindfolio.png",
+      "32": "mindfolio.png",
+      "48": "mindfolio.png",
+      "128": "mindfolio.png"
+    }
+  },
+  "icons": {
+    "16": "mindfolio.png",
+    "32": "mindfolio.png",
+    "48": "mindfolio.png",
+    "128": "mindfolio.png"
+  }
 }
