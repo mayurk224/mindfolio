@@ -90,21 +90,23 @@ async function saveManualItem(req, res) {
     const resourceUrl = normalizeString(req.body.resourceUrl);
     const title = normalizeString(req.body.title);
     const description = normalizeString(req.body.description);
-    
+
     const textContent = buildTextContent({
       description,
       textContent: normalizeString(req.body.textContent),
       pageUrl,
       resourceUrl,
     });
-    
+
     const requestedType = getRequestedType(req.body.type);
-    
+
     // Resolve the URL from various possible frontend/extension payloads
     let url = resourceUrl || pageUrl || legacyUrl;
 
     if (!url && !textContent) {
-      return res.status(400).json({ message: "A URL or text content is required." });
+      return res
+        .status(400)
+        .json({ message: "A URL or text content is required." });
     }
 
     // 1. Explicit Type Inference
@@ -156,18 +158,20 @@ async function saveManualItem(req, res) {
       message: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} queued for AI processing`,
       item: newItem,
     });
-
   } catch (error) {
     console.error("Error saving item:", error);
-    
+
     // Check if it's a MongoDB Duplicate Key Error
     if (error.code === 11000) {
-      return res.status(409).json({ 
-        message: "You have already saved this link. If this is a note, ensure your DB url index is 'sparse: true'." 
+      return res.status(409).json({
+        message:
+          "You have already saved this link. If this is a note, ensure your DB url index is 'sparse: true'.",
       });
     }
-    
-    return res.status(500).json({ message: "Server error while saving the item." });
+
+    return res
+      .status(500)
+      .json({ message: "Server error while saving the item." });
   }
 }
 
