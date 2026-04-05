@@ -53,11 +53,11 @@ export const useItem = () => {
     }
   };
 
-  const fetchItems = async (page = 1, limit = 20) => {
+  const fetchItems = async (page = 1, limit = 20, collectionId) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getItemsFromDB(page, limit);
+      const response = await getItemsFromDB(page, limit, collectionId);
       const data = await response.json();
 
       if (!response.ok) {

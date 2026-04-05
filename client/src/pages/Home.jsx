@@ -17,6 +17,7 @@ import {
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSection from "@/components/TimelineSection";
+import CollectionSection from "@/components/CollectionSection";
 import { useItem } from "@/hooks/useItem";
 import PopoverForm from "@/components/PopoverForm";
 
@@ -240,12 +241,30 @@ const Home = () => {
             </div>
           )}
 
-          <TimelineSection
-            items={filteredItems}
-            isLoading={isLoading && page === 1}
-            onItemUpdate={handleItemUpdated}
-            onItemDelete={handleItemDeleted}
-          />
+          {sidebarTab === "Home" && (
+            <TimelineSection
+              items={filteredItems}
+              isLoading={isLoading && page === 1}
+              onItemUpdate={handleItemUpdated}
+              onItemDelete={handleItemDeleted}
+            />
+          )}
+
+          {sidebarTab === "Trash" && (
+            <TimelineSection
+              items={filteredItems}
+              isLoading={isLoading && page === 1}
+              onItemUpdate={handleItemUpdated}
+              onItemDelete={handleItemDeleted}
+            />
+          )}
+
+          {sidebarTab === "Collection" && (
+            <CollectionSection
+              onItemUpdate={handleItemUpdated}
+              onItemDelete={handleItemDeleted}
+            />
+          )}
 
           {/* Sentinel for infinite scroll */}
           <div ref={observerTarget} className="h-10 w-full flex items-center justify-center mt-4">

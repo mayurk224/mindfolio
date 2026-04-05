@@ -59,8 +59,12 @@ export const updateItem = async (itemId, updateData) => {
   return response;
 };
 
-export const getItemsFromDB = async (page = 1, limit = 20) => {
-  const response = await fetch(`${API_URL}/?page=${page}&limit=${limit}`, {
+export const getItemsFromDB = async (page = 1, limit = 20, collectionId) => {
+  let url = `${API_URL}/?page=${page}&limit=${limit}`;
+  if (collectionId) {
+    url += `&collectionId=${collectionId}`;
+  }
+  const response = await fetch(url, {
     method: "GET",
     credentials: "include",
     headers: {

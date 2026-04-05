@@ -200,17 +200,21 @@ async function getUserItems(req, res) {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
+    const collectionId = req.query.collectionId;
+
+    const query = { userId: req.userId, isDeleted: { $ne: true } };
+    if (collectionId) {
+      query.collections = collectionId;
+    }
+
     const items = await itemModel
-      .find({ userId: req.userId, isDeleted: { $ne: true } })
+      .find(query)
       .select("+textContent")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await itemModel.countDocuments({
-      userId: req.userId,
-      isDeleted: { $ne: true },
-    });
+    const total = await itemModel.countDocuments(query);
 
     res.status(200).json({
       message: "Items fetched successfully!",
