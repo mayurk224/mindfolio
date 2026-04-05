@@ -181,6 +181,8 @@ export const aiWorker = new Worker(
       let finalType = sourceType || job.data.type || "other";
       let finalAuthor = "";
       let finalThumbnailUrl = "";
+      let finalUrl = undefined;
+      let finalSourceLink = undefined;
 
       if (job.data.type === "images") {
         console.log(`[Worker] 👁️ Analyzing Image: ${url}`);
@@ -285,6 +287,48 @@ export const aiWorker = new Worker(
 
         textToEmbed = `${finalTitle}. ${aiResponse.summary} ${url}`;
         finalType = "youtube";
+      } else if (url && url.includes("instagram.com")) {
+        console.log(`[Worker] 📸 Scraping Instagram: ${url}`);
+
+        try {
+          const options = {
+            method: "GET",
+            headers: {
+              "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+              "X-RapidAPI-Host": process.env.RAPIDAPI_HOST,
+            },
+          };
+          const response = await fetch(
+            `https://${process.env.RAPIDAPI_HOST}/instagram/post?url=${encodeURIComponent(url)}`,
+            options,
+          );
+          const result = await response.json();
+
+          aiResponse = {
+            title:
+              "Instagram Post by @" + (result.author_username || "instagram"),
+            summary: result.caption || "Instagram Post",
+            tags: ["instagram", "social media"],
+            type: "posts",
+            image_url: result.image_url,
+          };
+        } catch (error) {
+          console.error("Failed to fetch Instagram data:", error);
+          aiResponse = {
+            title: "Instagram Post",
+            summary: "Instagram post via " + url,
+            tags: ["instagram", "social media"],
+            type: "posts",
+          };
+        }
+
+        textToEmbed = aiResponse.summary;
+        finalTitle = aiResponse.title;
+        finalType = aiResponse.type;
+        if (aiResponse.image_url) {
+          finalUrl = aiResponse.image_url;
+          finalSourceLink = url;
+        }
       } else if (job.data.type === "web") {
         // Standard Web Scraping Logic
         let contentToAnalyze = textContent;
@@ -356,6 +400,14 @@ export const aiWorker = new Worker(
 
       if (finalThumbnailUrl) {
         updatePayload.thumbnailUrl = finalThumbnailUrl;
+      }
+
+      if (finalUrl) {
+        updatePayload.url = finalUrl;
+      }
+
+      if (finalSourceLink) {
+        updatePayload.sourceLink = finalSourceLink;
       }
 
       await itemModel.findByIdAndUpdate(documentId, updatePayload);

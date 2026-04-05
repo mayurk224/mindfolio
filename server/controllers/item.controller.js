@@ -143,6 +143,9 @@ async function saveManualItem(req, res) {
       item: newItem,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "You have already saved this link." });
+    }
     console.error("Error saving item:", error);
     return res
       .status(500)
@@ -321,6 +324,9 @@ async function uploadImage(req, res) {
       item: newItem,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "You have already uploaded this file." });
+    }
     console.error("File upload failed:", error);
     res.status(500).json({ message: "Failed to upload file." });
   }

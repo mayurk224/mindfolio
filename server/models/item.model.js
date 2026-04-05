@@ -13,6 +13,10 @@ const itemSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    sourceLink: {
+      type: String,
+      required: false,
+    },
     type: {
       type: String,
       enum: [

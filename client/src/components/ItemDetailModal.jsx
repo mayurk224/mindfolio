@@ -22,6 +22,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import InstaEmbed from "./InstaEmbed";
 
 const TYPE_LABELS = {
   web: "Web App",
@@ -148,6 +149,8 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
   const domain = getDomain(item.url);
   const typeLabel = getTypeLabel(item.type);
   const isYouTube = item.type === "youtube";
+  const isInstagram =
+    item.type === "posts" && item.url?.includes("instagram.com");
   const previewUrl = isYouTube ? getYouTubeEmbedUrl(item.url) : item.url;
   const summary =
     item.summary ||
@@ -246,7 +249,12 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
                       <Skeleton className="h-full w-full rounded-[1.4rem] bg-white/8" />
                     </div>
                   )}
-                  {item.type === "images" ? (
+                  {isInstagram ? (
+                    <InstaEmbed
+                      postUrl={item.url}
+                      onLoad={() => setIsPreviewLoading(false)}
+                    />
+                  ) : ["images", "posts"].includes(item.type) ? (
                     <div className="flex h-full w-full items-center justify-center bg-black/5 p-2 sm:p-4">
                       <img
                         src={item.url}
@@ -338,7 +346,7 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
 
                 {/* Summary */}
                 <Section icon={Sparkles} title="Summary">
-                  <div className="rounded-[1.4rem] border border-border/70 bg-secondary/40 p-4 text-sm leading-relaxed text-muted-foreground shadow-sm">
+                  <div className="rounded-[1.4rem] border border-border/70 bg-secondary/40 p-4 text-sm leading-relaxed text-muted-foreground shadow-sm whitespace-pre-wrap">
                     {summary}
                   </div>
                 </Section>
@@ -430,6 +438,21 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
                     )}
                   </div>
                 </Section>
+
+                {/* Source Link */}
+                {item.sourceLink && (
+                  <div className="mt-4 flex justify-center pb-2">
+                    <a
+                      href={item.sourceLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      View Original Post
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
 

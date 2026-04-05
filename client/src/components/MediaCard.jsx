@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Newspaper, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InstagramFreeIcons } from "@hugeicons/core-free-icons/index";
+import InstaSmallEmbed from "./InstaSmallEmbed";
+import { Button } from "./ui/button";
 
 export default function MediaCard({
   item: initialItem,
@@ -9,8 +12,11 @@ export default function MediaCard({
 }) {
   const [item, setItem] = useState(initialItem);
   const displayImage =
-    item.thumbnailUrl || (item.type === "images" ? item.url : null);
+    item.thumbnailUrl ||
+    (["images", "posts"].includes(item.type) ? item.url : null);
   const isVideo = item.type === "videos" && item.url;
+  const isInstagram =
+    item.type === "posts" && item.url?.includes("instagram.com");
   const hasPreview = !!displayImage || isVideo;
   const isProcessing =
     item.status === "pending" || item.status === "processing";
@@ -54,6 +60,29 @@ export default function MediaCard({
 
     return () => clearInterval(pollInterval);
   }, [item._id, isProcessing]);
+
+  if (isInstagram) {
+    return (
+      <div
+        className={cn(
+          "relative group overflow-hidden rounded-3xl bg-secondary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 cursor-pointer border border-white/5 flex flex-col items-center justify-center",
+          className,
+        )}
+      >
+        <InstaSmallEmbed postUrl={item.url} />
+        {/* Overlay Button for Instagram posts */}
+        <div className="absolute inset-x-0 bottom-0 p-4 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full rounded-full gap-2 bg-white/10 border-white/20 hover:bg-white/20 backdrop-blur-md text-white"
+          >
+            View Item
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
