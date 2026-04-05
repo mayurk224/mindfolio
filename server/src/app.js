@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from "../routes/auth.routes.js";
 import itemRoutes from "../routes/item.routes.js";
+import collectionRoutes from "../routes/collection.routes.js";
 import { saveManualItem } from "../controllers/item.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 
@@ -67,5 +68,6 @@ app.use("/api/auth", authRoutes);
 
 app.post("/save", requireAuth, saveManualItem);
 app.use("/api/items", itemRoutes);
+app.use("/api/collections", collectionRoutes);
 
 export default app;

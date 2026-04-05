@@ -81,6 +81,12 @@ const itemSchema = new mongoose.Schema(
       default: false,
       index: true, // Quickly filter out deleted items
     },
+    collections: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "collections",
+      },
+    ],
   },
   {
     timestamps: true,

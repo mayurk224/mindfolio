@@ -22,9 +22,12 @@ import {
   Tag,
   Trash2,
   X,
+  FolderPlus,
 } from "lucide-react";
 import InstaEmbed from "./InstaEmbed";
+import CollectionSavePopup from "./CollectionSavePopup";
 import { softDeleteItem, updateItem } from "@/services/itemService";
+import { AnimatePresence, motion } from "framer-motion";
 
 const TYPE_LABELS = {
   web: "Web App",
@@ -148,6 +151,7 @@ export default function ItemDetailModal({
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [showCollectionPopup, setShowCollectionPopup] = useState(false);
   const tagInputRef = useRef(null);
   const initialValuesRef = useRef({ title: "", textContent: "", notes: "" });
 
@@ -333,7 +337,8 @@ export default function ItemDetailModal({
   };
 
   return (
-    <Dialog
+    <>
+      <Dialog
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose();
@@ -614,6 +619,17 @@ export default function ItemDetailModal({
 
               <Button
                 type="button"
+                variant={showCollectionPopup ? "default" : "outline"}
+                size="icon"
+                onClick={() => setShowCollectionPopup(true)}
+                className="rounded-full"
+                aria-label="Save to collection"
+              >
+                <FolderPlus className="h-4 w-4" />
+              </Button>
+
+              <Button
+                type="button"
                 variant="outline"
                 size="icon"
                 onClick={handleShare}
@@ -651,5 +667,22 @@ export default function ItemDetailModal({
         </div>
       </DialogContent>
     </Dialog>
+    <AnimatePresence>
+      {showCollectionPopup && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={() => setShowCollectionPopup(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+          />
+          <CollectionSavePopup item={item} onClose={() => setShowCollectionPopup(false)} />
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
