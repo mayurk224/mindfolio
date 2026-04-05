@@ -46,6 +46,19 @@ export const softDeleteItem = async (itemId) => {
   return response;
 };
 
+export const updateItem = async (itemId, updateData) => {
+  const response = await fetch(`${API_URL}/${itemId}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updateData),
+  });
+
+  return response;
+};
+
 export const getItemsFromDB = async () => {
   const response = await fetch(`${API_URL}/`, {
     method: "GET",

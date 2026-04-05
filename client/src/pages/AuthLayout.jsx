@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation, Navigate } from "react-router";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { GalleryVerticalEnd } from "lucide-react";
+import { GalleryVerticalEnd, Loader2 } from "lucide-react";
 import { useGoogleLogin as useGoogleOAuth } from "@react-oauth/google";
 import { useGoogleLogin, useGoogleSignup } from "@/hooks/useAuth";
 import { useAuthContext } from "@/context/AuthContext";
@@ -21,10 +21,18 @@ export function AuthLayout({
   const isLogin = location.pathname === "/login";
   const { user, loading } = useAuthContext();
 
-  const { handleGoogleSuccess: loginSuccess, handleGoogleError: loginError } =
-    useGoogleLogin();
-  const { handleGoogleSuccess: signupSuccess, handleGoogleError: signupError } =
-    useGoogleSignup();
+  const {
+    handleGoogleSuccess: loginSuccess,
+    handleGoogleError: loginError,
+    isLoading: isLoginLoading,
+  } = useGoogleLogin();
+  const {
+    handleGoogleSuccess: signupSuccess,
+    handleGoogleError: signupError,
+    isLoading: isSignupLoading,
+  } = useGoogleSignup();
+
+  const authLoading = isLogin ? isLoginLoading : isSignupLoading;
 
   const handleSuccess = isLogin ? loginSuccess : signupSuccess;
   const handleError = isLogin ? loginError : signupError;
@@ -54,15 +62,15 @@ export function AuthLayout({
           <form>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <a
-                  href="#"
+                <Link
+                  to="/landing"
                   className="flex flex-col items-center gap-2 font-medium"
                 >
                   <div className="flex items-center justify-center rounded-md">
                     <img src="/mindfolio.png" alt="" className="size-12" />
                   </div>
                   <span className="sr-only">MindFolio</span>
-                </a>
+                </Link>
                 <h1 className="text-xl font-bold">Welcome to MindFolio</h1>
                 {isLogin ? (
                   <FieldDescription>
@@ -80,6 +88,7 @@ export function AuthLayout({
                   type="button"
                   variant="outline"
                   className="w-full gap-2 rounded-full py-6 font-semibold"
+                  disabled={authLoading}
                   onClick={() => {
                     toast.info(
                       isLogin
@@ -89,8 +98,17 @@ export function AuthLayout({
                     loginWithGoogle();
                   }}
                 >
-                  <GoogleIcon className="size-5" />
-                  {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                  {authLoading ? (
+                    <>
+                      <Loader2 className="size-5 animate-spin" />
+                      {isLogin ? "Signing in..." : "Signing up..."}
+                    </>
+                  ) : (
+                    <>
+                      <GoogleIcon className="size-5" />
+                      {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                    </>
+                  )}
                 </Button>
               </Field>
             </FieldGroup>

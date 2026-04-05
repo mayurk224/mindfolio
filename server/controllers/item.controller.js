@@ -158,9 +158,10 @@ async function saveManualItem(req, res) {
     }
 
     return res.status(201).json({
-      message: itemType === "notes"
-        ? "Note saved successfully"
-        : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} queued for AI processing`,
+      message:
+        itemType === "notes"
+          ? "Note saved successfully"
+          : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} queued for AI processing`,
       item: newItem,
     });
   } catch (error) {
@@ -378,7 +379,45 @@ async function softDeleteItem(req, res) {
     return res.status(200).json({ message: "Item deleted.", item });
   } catch (error) {
     console.error("Error soft-deleting item:", error);
-    return res.status(500).json({ message: "Server error while deleting the item." });
+    return res
+      .status(500)
+      .json({ message: "Server error while deleting the item." });
+  }
+}
+
+// PATCH /api/items/:id
+// Update an existing item (e.g., tags, notes, title)
+async function updateItem(req, res) {
+  try {
+    const { id } = req.params;
+    const { title, textContent, userNotes, aiTags, isFavorite } = req.body;
+
+    const updateData = {};
+    if (title !== undefined) updateData.title = normalizeString(title);
+    if (textContent !== undefined)
+      updateData.textContent = normalizeString(textContent);
+    if (userNotes !== undefined)
+      updateData.userNotes = normalizeString(userNotes);
+    if (aiTags !== undefined)
+      updateData.aiTags = Array.isArray(aiTags) ? aiTags : [];
+    if (isFavorite !== undefined) updateData.isFavorite = Boolean(isFavorite);
+
+    const item = await itemModel.findOneAndUpdate(
+      { _id: id, userId: req.userId },
+      { $set: updateData },
+      { new: true, runValidators: true },
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found." });
+    }
+
+    return res.status(200).json({ message: "Item updated successfully", item });
+  } catch (error) {
+    console.error("Error updating item:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error while updating the item." });
   }
 }
 
@@ -389,4 +428,5 @@ export {
   searchItems,
   uploadImage,
   softDeleteItem,
+  updateItem,
 };

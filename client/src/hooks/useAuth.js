@@ -2,13 +2,16 @@ import { useNavigate } from "react-router";
 import { googleLogin, googleSignup } from "@/services/authService";
 import { toast } from "sonner";
 import { useAuthContext } from "@/context/AuthContext";
+import { useState } from "react";
 
 export const useGoogleLogin = () => {
   const navigate = useNavigate();
   const { setUser } = useAuthContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSuccess = async (response) => {
     try {
+      setIsLoading(true);
       // Handle both standard button (credential) and custom button (access_token)
       const token = response.credential || response.access_token;
 
@@ -28,6 +31,8 @@ export const useGoogleLogin = () => {
     } catch (error) {
       console.error("Google Login Error:", error);
       toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,14 +43,17 @@ export const useGoogleLogin = () => {
   return {
     handleGoogleSuccess,
     handleGoogleError,
+    isLoading,
   };
 };
 
 export const useGoogleSignup = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSuccess = async (response) => {
     try {
+      setIsLoading(true);
       // Handle both standard button (credential) and custom button (access_token)
       const token = response.credential || response.access_token;
 
@@ -64,6 +72,8 @@ export const useGoogleSignup = () => {
     } catch (error) {
       console.error("Google Signup Error:", error);
       toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,5 +84,6 @@ export const useGoogleSignup = () => {
   return {
     handleGoogleSuccess,
     handleGoogleError,
+    isLoading,
   };
 };

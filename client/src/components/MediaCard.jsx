@@ -7,19 +7,28 @@ import {
   Link2,
   Newspaper,
   Loader2,
+  Play,
+  CircleFadingPlus,
+  Globe,
 } from "lucide-react";
 
 function getTypeIcon(type, className) {
   const props = { className: className ?? "h-4 w-4" };
   switch (type) {
+    case "web":
+      return <Globe {...props} />;
     case "images":
       return <ImageIcon {...props} />;
     case "videos":
       return <Video {...props} />;
+    case "youtube":
+      return <Play {...props} />;
     case "posts":
-      return <Newspaper {...props} />;
-    case "articles":
+      return <CircleFadingPlus {...props} />;
+    case "documents":
       return <FileText {...props} />;
+    case "articles":
+      return <Newspaper {...props} />;
     case "notes":
       return <NotebookPen {...props} />;
     case "links":

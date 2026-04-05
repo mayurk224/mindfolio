@@ -23,7 +23,7 @@ import {
   X,
 } from "lucide-react";
 import InstaEmbed from "./InstaEmbed";
-import { softDeleteItem } from "@/services/itemService";
+import { softDeleteItem, updateItem } from "@/services/itemService";
 
 const TYPE_LABELS = {
   web: "Web App",
@@ -45,7 +45,8 @@ function getTypeLabel(type) {
 
 function getYouTubeEmbedUrl(url) {
   if (!url) return "";
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11
     ? `https://www.youtube.com/embed/${match[2]}`
@@ -106,13 +107,26 @@ function MetaPill({ icon: Icon, children }) {
   );
 }
 
-function TagPill({ children }) {
+function TagPill({ children, onRemove }) {
   return (
     <Badge
       variant="secondary"
-      className="h-auto rounded-full border border-border/70 bg-secondary/70 px-3 py-1 text-xs font-medium text-foreground"
+      className="h-auto rounded-full border border-border/70 bg-secondary/70 px-3 py-1 text-xs font-medium text-foreground group"
     >
-      {children}
+      <span>{children}</span>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="ml-1.5 -mr-1 rounded-full p-0.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors"
+          aria-label={`Remove ${children} tag`}
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
     </Badge>
   );
 }
@@ -195,7 +209,7 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
     setNewTag("");
   };
 
-  const handleConfirmTag = () => {
+  const handleConfirmTag = async () => {
     const trimmedTag = newTag.trim();
     if (!trimmedTag) {
       setIsAddingTag(false);
@@ -208,10 +222,34 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
       toast("That tag is already in the list.");
       return;
     }
-    setTags((currentTags) => [...currentTags, trimmedTag]);
-    setNewTag("");
-    setIsAddingTag(false);
-    toast.success("Tag added.");
+
+    const updatedTags = [...tags, trimmedTag];
+
+    try {
+      const response = await updateItem(item._id, { aiTags: updatedTags });
+      if (!response.ok) throw new Error();
+
+      setTags(updatedTags);
+      setNewTag("");
+      setIsAddingTag(false);
+      toast.success("Tag added.");
+    } catch {
+      toast.error("Failed to add tag. Please try again.");
+    }
+  };
+
+  const handleRemoveTag = async (tagToRemove) => {
+    const updatedTags = tags.filter((tag) => tag !== tagToRemove);
+
+    try {
+      const response = await updateItem(item._id, { aiTags: updatedTags });
+      if (!response.ok) throw new Error();
+
+      setTags(updatedTags);
+      toast.success("Tag removed.");
+    } catch {
+      toast.error("Failed to remove tag.");
+    }
   };
 
   const handleCancelTag = () => {
@@ -450,7 +488,12 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
                   {tags.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {tags.map((tag) => (
-                        <TagPill key={tag}>{tag}</TagPill>
+                        <TagPill
+                          key={tag}
+                          onRemove={() => handleRemoveTag(tag)}
+                        >
+                          {tag}
+                        </TagPill>
                       ))}
                     </div>
                   ) : (
