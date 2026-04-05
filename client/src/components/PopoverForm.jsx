@@ -9,14 +9,16 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FileUploadBox from "./FileUploadBox";
 import { useState } from "react";
 import { useItem } from "@/hooks/useItem";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Link, FileText, FileUp } from "lucide-react";
 
 export default function PopoverForm({ onSuccess }) {
   const { saveItem, uploadItem, isLoading } = useItem();
+  const [activeTab, setActiveTab] = useState("link");
   const [formData, setFormData] = useState({
     url: "",
     title: "",
@@ -47,24 +49,31 @@ export default function PopoverForm({ onSuccess }) {
   };
 
   const handleSubmit = async () => {
+    // Basic validation based on tab
+    if (activeTab === "link" && !formData.url.trim()) {
+      toast.error("Please enter a URL.");
+      return;
+    }
+    if (activeTab === "note" && (!formData.title.trim() || !formData.textContent.trim())) {
+      toast.error("Please enter both a title and content for the note.");
+      return;
+    }
+    if (activeTab === "file" && !selectedFile) {
+      toast.error("Please select a file to upload.");
+      return;
+    }
+
     const payload = {
-      url: formData.url.trim(),
       title: formData.title.trim(),
-      type: formData.type.trim(),
+      type: activeTab === "note" ? "notes" : formData.type.trim(),
       textContent: formData.textContent.trim(),
     };
 
-    if (!payload.url && !payload.textContent && !selectedFile) {
-      toast.error("Please add a file, URL, or text content.");
-      return;
+    if (activeTab === "link") {
+      payload.url = formData.url.trim();
     }
 
-    if (selectedFile && payload.url) {
-      toast.error("Use either a file upload or a URL in one submission.");
-      return;
-    }
-
-    const result = selectedFile
+    const result = (activeTab === "file" && selectedFile)
       ? await uploadItem(selectedFile, {
           title: payload.title,
           type: payload.type,
@@ -73,7 +82,7 @@ export default function PopoverForm({ onSuccess }) {
       : await saveItem(payload);
 
     if (result.success) {
-      toast.success("Item saved successfully!");
+      toast.success(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`);
       if (onSuccess && result.item) {
         onSuccess(result.item);
       }
@@ -84,88 +93,138 @@ export default function PopoverForm({ onSuccess }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto no-scrollbar">
-      {/* File Upload (smaller) */}
-      <FileUploadBox
-        key={fileUploadKey}
-        onFileSelect={setSelectedFile}
-        disabled={isLoading}
-      />
+    <div className="flex flex-col gap-4 max-h-[85vh] overflow-y-auto no-scrollbar">
+      <Tabs defaultValue="link" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsTrigger value="link" className="flex items-center gap-2">
+            <Link className="w-3.5 h-3.5" />
+            <span>Link</span>
+          </TabsTrigger>
+          <TabsTrigger value="note" className="flex items-center gap-2">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Note</span>
+          </TabsTrigger>
+          <TabsTrigger value="file" className="flex items-center gap-2">
+            <FileUp className="w-3.5 h-3.5" />
+            <span>File</span>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* URL */}
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="url" className="text-xs">
-          URL
-        </Label>
-        <Input
-          id="url"
-          value={formData.url}
-          onChange={handleChange}
-          placeholder="https://..."
-          className="h-8"
-        />
+        <TabsContent value="link" className="flex flex-col gap-4 mt-0">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="url" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              URL
+            </Label>
+            <Input
+              id="url"
+              value={formData.url}
+              onChange={handleChange}
+              placeholder="https://example.com"
+              className="h-9"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="title" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Title (Optional)
+            </Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Give it a name"
+              className="h-9"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type (Optional)</Label>
+            <Select value={formData.type} onValueChange={handleTypeChange}>
+              <SelectTrigger className="w-full h-9">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="web">Web</SelectItem>
+                <SelectItem value="articles">Articles</SelectItem>
+                <SelectItem value="videos">Videos</SelectItem>
+                <SelectItem value="youtube">YouTube</SelectItem>
+                <SelectItem value="posts">Posts</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="note" className="flex flex-col gap-4 mt-0">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="title" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Note Title
+            </Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Title of your note"
+              className="h-9"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="textContent" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Content
+            </Label>
+            <Textarea
+              id="textContent"
+              value={formData.textContent}
+              onChange={handleChange}
+              placeholder="Write your thoughts here..."
+              className="min-h-[150px] resize-none"
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="file" className="flex flex-col gap-4 mt-0">
+          <FileUploadBox
+            key={fileUploadKey}
+            onFileSelect={setSelectedFile}
+            disabled={isLoading}
+          />
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="title" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Title (Optional)
+            </Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter title"
+              className="h-9"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type (Optional)</Label>
+            <Select value={formData.type} onValueChange={handleTypeChange}>
+              <SelectTrigger className="w-full h-9">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="images">Image</SelectItem>
+                <SelectItem value="videos">Video</SelectItem>
+                <SelectItem value="documents">Document</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <div className="pt-2">
+        <Button
+          className="w-full h-10 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]"
+          onClick={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary-foreground/70" />}
+          {isLoading ? "Saving..." : `Add ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+        </Button>
       </div>
-
-      {/* Title */}
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="title" className="text-xs">
-          Title
-        </Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Enter title"
-          className="h-8"
-        />
-      </div>
-
-      {/* Type */}
-      <div className="flex flex-col gap-1">
-        <Label className="text-xs">Type</Label>
-        <Select value={formData.type} onValueChange={handleTypeChange}>
-          <SelectTrigger className="w-full h-8">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="web">Web</SelectItem>
-            <SelectItem value="images">Images</SelectItem>
-            <SelectItem value="videos">Videos</SelectItem>
-            <SelectItem value="documents">Documents</SelectItem>
-            <SelectItem value="articles">Articles</SelectItem>
-            <SelectItem value="notes">Notes</SelectItem>
-            <SelectItem value="youtube">YouTube</SelectItem>
-            <SelectItem value="quotes">Quotes</SelectItem>
-            <SelectItem value="posts">Posts</SelectItem>
-            <SelectItem value="snippets">Snippets</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Text Content */}
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="textContent" className="text-xs">
-          Text
-        </Label>
-        <Textarea
-          id="textContent"
-          value={formData.textContent}
-          onChange={handleChange}
-          placeholder="Write..."
-          className="min-h-[80px]"
-        />
-      </div>
-
-      {/* Submit */}
-      <Button
-        className="w-full h-8 text-sm"
-        onClick={handleSubmit}
-        disabled={isLoading}
-      >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {isLoading ? "Saving..." : "Add Item"}
-      </Button>
     </div>
   );
 }

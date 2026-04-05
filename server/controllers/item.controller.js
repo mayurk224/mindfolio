@@ -105,24 +105,35 @@ async function saveManualItem(req, res) {
         .json({ message: "A URL or text content is required." });
     }
 
+    // 1. Explicit Type Inference
     let itemType = requestedType;
-    if (!itemType && url) {
-      if (url.includes("youtube.com") || url.includes("youtu.be")) {
-        itemType = "youtube";
-      } else if (isImageUrl(url)) {
-        itemType = "images";
-      } else {
-        itemType = "web";
+
+    if (!itemType) {
+      if (textContent && !url) {
+        // EXPLICIT NOTES OVERRIDE: If there is text content and no URL, it is definitely a note.
+        itemType = "notes";
+      } else if (url) {
+        if (url.includes("youtube.com") || url.includes("youtu.be")) {
+          itemType = "youtube";
+        } else if (isImageUrl(url)) {
+          itemType = "images";
+        } else {
+          itemType = "web";
+        }
       }
     }
-    itemType = itemType || "notes";
+
+    itemType = itemType || "notes"; // Ultimate fallback
+
+    // 2. Safe trim (use optional chaining in case url is undefined)
+    const finalUrl = url?.trim() || null;
 
     const newItem = new itemModel({
       userId: req.userId,
-      url: url || undefined,
-      title: title || (url ? "Analyzing Link..." : "Analyzing Note..."),
+      url: finalUrl,
+      title: title || (finalUrl ? "Analyzing Link..." : "Analyzing Note..."),
       type: itemType,
-      thumbnailUrl: itemType === "images" ? url : undefined,
+      thumbnailUrl: itemType === "images" ? finalUrl : undefined,
       textContent: textContent || undefined,
       status: "pending",
     });
@@ -131,7 +142,7 @@ async function saveManualItem(req, res) {
 
     await processingQueue.add("process-content", {
       documentId: newItem._id,
-      url: url || undefined,
+      url: finalUrl || undefined,
       textContent: textContent || undefined,
       type: itemType,
       sourceTitle: title || undefined,
@@ -144,7 +155,9 @@ async function saveManualItem(req, res) {
     });
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(409).json({ message: "You have already saved this link." });
+      return res
+        .status(409)
+        .json({ message: "You have already saved this link." });
     }
     console.error("Error saving item:", error);
     return res
@@ -325,7 +338,9 @@ async function uploadImage(req, res) {
     });
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(409).json({ message: "You have already uploaded this file." });
+      return res
+        .status(409)
+        .json({ message: "You have already uploaded this file." });
     }
     console.error("File upload failed:", error);
     res.status(500).json({ message: "Failed to upload file." });
