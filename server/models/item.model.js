@@ -83,6 +83,13 @@ const itemSchema = new mongoose.Schema(
 );
 
 // Optional: Compound index to prevent users from saving the exact same URL twice
-itemSchema.index({ userId: 1, url: 1 }, { unique: true, sparse: true });
+itemSchema.index(
+  { userId: 1, url: 1 },
+  {
+    unique: true,
+    // CRITICAL: Only enforce uniqueness if the URL actually exists and is a string
+    partialFilterExpression: { url: { $type: "string" } },
+  },
+);
 
 export const itemModel = mongoose.model("items", itemSchema);

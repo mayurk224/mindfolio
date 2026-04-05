@@ -378,6 +378,16 @@ export const aiWorker = new Worker(
           finalTitle = aiResponse.title || finalTitle || "Web Content";
         }
         finalType = sourceType || aiResponse.type || finalType;
+      } else if (job.data.type === "notes") {
+        console.log(`[Worker] 📝 Processing Note: ${finalTitle}`);
+        aiResponse = await structuredLlm.invoke(`
+          Analyze this note and provide a professional title, a 2-sentence summary, and 3-6 relevant tags.
+          NOTE CONTENT:
+          ${textContent}
+        `);
+        textToEmbed = textContent;
+        finalTitle = sourceTitle?.trim() || aiResponse.title || "Note Analysis";
+        finalType = "notes";
       } else {
         throw new Error(`Unsupported job type: ${job.data.type}`);
       }

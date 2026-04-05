@@ -119,6 +119,8 @@ function TagPill({ children }) {
 export default function ItemDetailModal({ item, isOpen, onClose }) {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState([]);
+  const [title, setTitle] = useState("");
+  const [textContent, setTextContent] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
@@ -129,6 +131,8 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
     if (!item) return;
     setNotes(item.userNotes || "");
     setTags(item.aiTags || []);
+    setTitle(item.title || "");
+    setTextContent(item.textContent || "");
     setIsFavorite(Boolean(item.isFavorite));
     setIsPreviewLoading(Boolean(item.url));
     setIsAddingTag(false);
@@ -241,7 +245,33 @@ export default function ItemDetailModal({ item, isOpen, onClose }) {
           {/* LEFT: preview pane */}
           <div className="relative flex min-h-0 flex-col overflow-hidden p-2 sm:p-5">
             <div className="relative flex-1 overflow-hidden rounded-[1.75rem] border border-white/10 bg-black/30 shadow-[0_32px_80px_-24px_rgba(15,23,42,0.85)]">
-              {hasUrl ? (
+              {item.type === "notes" ? (
+                <div className="flex h-full flex-col p-8 sm:p-12 gap-8 overflow-y-auto no-scrollbar">
+                  <div className="space-y-4">
+                    <label className="text-xs font-bold uppercase tracking-widest text-primary/70 px-1">
+                      Note Title
+                    </label>
+                    <input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter note title..."
+                      className="w-full bg-transparent text-3xl sm:text-4xl font-bold text-white outline-none placeholder:text-white/20 px-0"
+                    />
+                  </div>
+
+                  <div className="flex-1 flex flex-col min-h-0 space-y-4">
+                    <label className="text-xs font-bold uppercase tracking-widest text-primary/70 px-1">
+                      Content
+                    </label>
+                    <textarea
+                      value={textContent}
+                      onChange={(e) => setTextContent(e.target.value)}
+                      placeholder="Start writing your thoughts..."
+                      className="w-full flex-1 bg-transparent text-lg text-white/80 leading-relaxed outline-none resize-none placeholder:text-white/20 no-scrollbar pb-8 px-0"
+                    />
+                  </div>
+                </div>
+              ) : hasUrl ? (
                 <>
                   {isPreviewLoading && (
                     <div className="absolute inset-0 z-10 flex flex-col gap-4 bg-slate-950/80 p-5">
