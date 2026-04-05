@@ -1,16 +1,84 @@
-# React + Vite
+# Mindfolio Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, fast, and interactive frontend for your Mindfolio second brain.
 
-Currently, two official plugins are available:
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Lucide_React-Latest-E34F26?logo=lucide&logoColor=white" alt="Lucide React" />
+  <img src="https://img.shields.io/badge/Framer_Motion-Latest-FF0055?logo=framer&logoColor=white" alt="Framer Motion" />
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Overview
 
-## React Compiler
+The Mindfolio Client is the user interface for the Mindfolio ecosystem. It provides a visual dashboard where users can view their saved items, organize them with tags, and interact with the AI-extracted summaries. Built with React 19 and Vite, it focuses on performance, accessibility, and a premium aesthetic using modern design patterns.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Key Features
 
-## Expanding the ESLint configuration
+- **Personal Dashboard**: A central timeline to view all saved bookmarks, images, and videos.
+- **Masonry Layout**: Dynamic, space-efficient grid representation of your saved content.
+- **AI Content Extraction**: Real-time display of summarized metadata and key insights.
+- **Google OAuth**: Fast and secure authentication with Google.
+- **Interactive UI**: Smooth animations with Framer Motion and a responsive design powered by Tailwind CSS 4.
+- **Real-time Notifications**: Instant feedback on saving operations via Sonner toasts and Socket.io.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Architecture & Structure
+
+```text
+client/
+├── src/
+│   ├── components/       # UI components (Button, Input, Sidebar, etc.)
+│   │   ├── ui/           # Shadcn/ui atomic components
+│   ├── pages/            # Page-level components (Home, Auth, Trash)
+│   ├── lib/              # Library configurations (utils, api)
+│   ├── hooks/            # Custom React hooks
+│   ├── context/          # State management context
+│   └── App.jsx           # Main application entry point
+├── public/               # Static assets
+└── index.html            # Main HTML file
+```
+
+## Getting Started
+
+### Prerequisites
+- **Node.js**: v18 or higher
+- **npm** or **yarn**
+
+### Installation
+
+1. **Navigate to the client directory:**
+   ```bash
+   cd client
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file from the example:
+   ```bash
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id
+   VITE_API_URL=http://localhost:8000/api
+   ```
+
+### Running the App
+
+1. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+2. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_GOOGLE_CLIENT_ID` | Your Google Cloud Console Client ID for OAuth. |
+| `VITE_API_URL` | The endpoint for your Mindfolio backend server. |

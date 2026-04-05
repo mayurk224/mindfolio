@@ -112,7 +112,7 @@ function setLoading(isLoading) {
 
 async function init() {
   // Hydrate open-app link
-  openAppBtn.href = EXTENSION_CONFIG.loginUrl.replace(/\/login$/, "") || "http://localhost:5173";
+  openAppBtn.href = EXTENSION_CONFIG.loginUrl.replace(/\/login$/, "") || "https://mindfolio-delta.vercel.app";
 
   // Check auth first
   const authResult = await checkAuthentication();

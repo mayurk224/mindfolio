@@ -1,8 +1,8 @@
 export const EXTENSION_CONFIG = {
-  apiBaseUrl: "http://localhost:8000",
+  apiBaseUrl: "https://mindfolio-putb.onrender.com",
   authMePath: "/auth/me",
   savePath: "/save",
-  loginUrl: "http://localhost:5173/login",
+  loginUrl: "https://mindfolio-delta.vercel.app/login",
   openLoginOnAuthFailure: true,
   retryAttempts: 1,
 };
