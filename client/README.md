@@ -16,10 +16,12 @@ The Mindfolio Client is the user interface for the Mindfolio ecosystem. It provi
 
 ## Key Features
 
-- **Personal Dashboard**: A central timeline to view all saved bookmarks, images, and videos.
-- **Masonry Layout**: Dynamic, space-efficient grid representation of your saved content.
-- **AI Content Extraction**: Real-time display of summarized metadata and key insights.
-- **Google OAuth**: Fast and secure authentication with Google.
+- **Personal Dashboard**: A central timeline with **Infinite Scroll** to view all saved bookmarks, images, and videos.
+- **Masonry Layout**: Dynamic, space-efficient grid representation of your saved content for optimal visibility.
+- **Collections Management**: Organize your saved items into custom collections for better categorization and quick access.
+- **Trash & Recovery**: Safely delete items with a soft-delete mechanism and recover them from the Trash view if needed.
+- **AI Content Extraction**: Real-time display of summarized metadata and key insights extracted by AI.
+- **Google OAuth**: Fast and secure authentication with Google for a seamless login experience.
 - **Interactive UI**: Smooth animations with Framer Motion and a responsive design powered by Tailwind CSS 4.
 - **Real-time Notifications**: Instant feedback on saving operations via Sonner toasts and Socket.io.
 

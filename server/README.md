@@ -19,6 +19,9 @@ The Mindfolio Server is a robust Node.js and Express backend that powers the sec
 
 - **AI Content Extraction**: Uses LangChain and MistralAI to automatically summarize and categorize incoming bookmarks.
 - **Web Scraping**: Leverages Mozilla Readability and jsdom to extract clean content from webpages.
+- **Collections API**: Full CRUD operations for organizing items into custom collections.
+- **Trash/Soft-Delete Mechanism**: Database-level soft-delete logic for easy item recovery within the Mindfolio ecosystem.
+- **Paginated Feed**: Support for cursor-based pagination to enable seamless infinite scroll on the frontend.
 - **Image & PDF Processing**: Handles image uploads to ImageKit and extracts text from PDFs for indexing.
 - **Social Media Integration**: Scrapes data from Instagram and other platforms via RapidAPI for seamless saving.
 - **Real-time Sync**: Provides instant feedback to the client via Socket.io when items are saved or updated.
@@ -29,10 +32,10 @@ The Mindfolio Server is a robust Node.js and Express backend that powers the sec
 ```text
 server/
 ├── config/             # Database and cloud service configurations
-├── controllers/        # Logical handlers for API routes
-├── models/             # Mongoose/MongoDB data schemas
+├── controllers/        # Logical handlers for API routes (Auth, Item, Collection)
+├── models/             # Mongoose schemas (User, Item, Collection)
 ├── middlewares/        # Express middleware (Auth, error handling)
-├── routes/             # RESTful API route definitions
+├── routes/             # RESTful API route definitions (Auth, Item, Collection)
 ├── services/           # External service integrations (AI, Email, Storage)
 ├── utils/              # General-purpose utility functions
 ├── server.js           # Server entry point and configuration

@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import TimelineSection from "@/components/TimelineSection";
 import CollectionSection from "@/components/CollectionSection";
 import { useItem } from "@/hooks/useItem";
@@ -281,11 +281,9 @@ const Home = () => {
 
         <div className="fixed bottom-5 right-5 z-50">
           <Popover>
-            <PopoverTrigger>
-              <Button>
-                <Plus className="h-4 w-4" />
-                Add Item
-              </Button>
+            <PopoverTrigger className={buttonVariants({ variant: "default" })}>
+              <Plus className="h-4 w-4" />
+              Add Item
             </PopoverTrigger>
             <PopoverContent className="w-96">
               <PopoverForm onSuccess={handleItemAdded} />

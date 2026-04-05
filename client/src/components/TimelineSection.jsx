@@ -4,7 +4,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown, Loader2 } from "lucide-react";
 import MediaCard from "./MediaCard";
@@ -83,14 +83,13 @@ export default function TimelineSection({
 
             <Separator className="flex-1" />
 
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-full hover:bg-secondary/50 transition-all group"
-              >
-                <ChevronDown className="h-5 w-5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-              </Button>
+            <CollapsibleTrigger
+              className={cn(
+                buttonVariants({ variant: "outline", size: "icon" }),
+                "h-9 w-9 rounded-full hover:bg-secondary/50 transition-all group",
+              )}
+            >
+              <ChevronDown className="h-5 w-5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
             </CollapsibleTrigger>
           </div>
 
