@@ -87,9 +87,9 @@ export default function TimelineSection({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-full hover:bg-secondary/50 transition-all"
+                className="h-9 w-9 rounded-full hover:bg-secondary/50 transition-all group"
               >
-                <ChevronDown className="h-5 w-5 transition-transform duration-300 data-[state=open]:rotate-180" />
+                <ChevronDown className="h-5 w-5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -111,12 +111,12 @@ export default function TimelineSection({
                   </h3>
 
                   {/* MediaCard Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                  <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6">
                     {dayItems.map((item) => (
                       <div
                         key={item._id}
                         onClick={() => setSelectedItem(item)}
-                        className="cursor-pointer"
+                        className="cursor-pointer break-inside-avoid mb-6"
                       >
                         <MediaCard
                           item={item}

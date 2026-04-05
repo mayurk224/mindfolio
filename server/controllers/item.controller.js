@@ -193,17 +193,30 @@ async function saveManualItem(req, res) {
 }
 
 // GET /api/items/
-// Route to fetch all items for the authenticated user
+// Route to fetch all items for the authenticated user (with pagination)
 async function getUserItems(req, res) {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     const items = await itemModel
       .find({ userId: req.userId, isDeleted: { $ne: true } })
       .select("+textContent")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await itemModel.countDocuments({
+      userId: req.userId,
+      isDeleted: { $ne: true },
+    });
 
     res.status(200).json({
       message: "Items fetched successfully!",
       items,
+      hasMore: total > skip + items.length,
+      total,
     });
   } catch (error) {
     console.error("Error fetching items:", error);
@@ -435,9 +448,44 @@ async function updateItem(req, res) {
   }
 }
 
+// GET /api/items/deleted
+// Route to fetch soft-deleted items for the authenticated user
+async function getDeletedItems(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const items = await itemModel
+      .find({ userId: req.userId, isDeleted: true })
+      .select("+textContent")
+      .sort({ updatedAt: -1 }) // Sort by most recently deleted
+      .skip(skip)
+      .limit(limit);
+
+    const total = await itemModel.countDocuments({
+      userId: req.userId,
+      isDeleted: true,
+    });
+
+    res.status(200).json({
+      message: "Deleted items fetched successfully!",
+      items,
+      hasMore: total > skip + items.length,
+      total,
+    });
+  } catch (error) {
+    console.error("Error fetching deleted items:", error);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching deleted items." });
+  }
+}
+
 export {
   saveManualItem,
   getUserItems,
+  getDeletedItems,
   getItemStatus,
   searchItems,
   uploadImage,

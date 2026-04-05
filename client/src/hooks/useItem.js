@@ -3,6 +3,7 @@ import {
   saveItemToDB,
   getItemsFromDB,
   uploadItemToDB,
+  getDeletedItemsFromDB,
 } from "@/services/itemService";
 
 export const useItem = () => {
@@ -52,11 +53,11 @@ export const useItem = () => {
     }
   };
 
-  const fetchItems = async () => {
+  const fetchItems = async (page = 1, limit = 20) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getItemsFromDB();
+      const response = await getItemsFromDB(page, limit);
       const data = await response.json();
 
       if (!response.ok) {
@@ -65,7 +66,7 @@ export const useItem = () => {
 
       setItems(data.items);
       setIsLoading(false);
-      return { success: true, items: data.items, data };
+      return { success: true, items: data.items, hasMore: data.hasMore, data };
     } catch (err) {
       console.error("Fetch Items Error:", err);
       setIsLoading(false);
@@ -74,5 +75,35 @@ export const useItem = () => {
     }
   };
 
-  return { saveItem, uploadItem, fetchItems, items, isLoading, error };
+  const fetchDeletedItems = async (page = 1, limit = 20) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getDeletedItemsFromDB(page, limit);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch deleted items.");
+      }
+
+      setItems(data.items);
+      setIsLoading(false);
+      return { success: true, items: data.items, hasMore: data.hasMore, data };
+    } catch (err) {
+      console.error("Fetch Deleted Items Error:", err);
+      setIsLoading(false);
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  return {
+    saveItem,
+    uploadItem,
+    fetchItems,
+    fetchDeletedItems,
+    items,
+    isLoading,
+    error,
+  };
 };

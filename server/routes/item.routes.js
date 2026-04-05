@@ -7,6 +7,7 @@ import {
   uploadImage,
   softDeleteItem,
   updateItem,
+  getDeletedItems,
 } from "../controllers/item.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/upload.middleware.js";
@@ -19,6 +20,7 @@ itemRoutes.use(requireAuth);
 itemRoutes.post("/save", saveManualItem);
 itemRoutes.get("/", getUserItems);
 itemRoutes.get("/search", searchItems);
+itemRoutes.get("/deleted", getDeletedItems);
 itemRoutes.get("/:id", getItemStatus);
 itemRoutes.post(
   "/upload",

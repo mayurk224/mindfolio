@@ -12,15 +12,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  InboxIcon,
-  FileIcon,
-  SentIcon,
-  ArchiveIcon,
-  Delete02Icon,
-  CommandIcon,
-} from "@hugeicons/core-free-icons";
 import { useAuthContext } from "@/context/AuthContext";
 import { Box, LayoutPanelLeft, Trash } from "lucide-react";
 
@@ -47,9 +38,8 @@ const data = {
     },
   ],
 };
-export function AppSidebar({ ...props }) {
+export function AppSidebar({ activeTab, onTabChange, ...props }) {
   const { user } = useAuthContext();
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -59,7 +49,7 @@ export function AppSidebar({ ...props }) {
             <SidebarMenuButton
               size="lg"
               className="md:h-8 md:p-0"
-              render={<a href="#" />}
+              onClick={() => onTabChange("Home")}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
                 <img src="/mindfolio.png" alt="" />
@@ -79,8 +69,8 @@ export function AppSidebar({ ...props }) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    onClick={() => setActiveItem(item)}
-                    isActive={activeItem?.title === item.title}
+                    onClick={() => onTabChange(item.title)}
+                    isActive={activeTab === item.title}
                   >
                     {item.icon}
                     <span>{item.title}</span>

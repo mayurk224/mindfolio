@@ -12,6 +12,10 @@ import {
   Globe,
 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+import InstaSmallEmbed from "./InstaSmallEmbed";
+import { Button } from "./ui/button";
+
 function getTypeIcon(type, className) {
   const props = { className: className ?? "h-4 w-4" };
   switch (type) {
@@ -37,9 +41,6 @@ function getTypeIcon(type, className) {
       return <Newspaper {...props} />;
   }
 }
-import { cn } from "@/lib/utils";
-import InstaSmallEmbed from "./InstaSmallEmbed";
-import { Button } from "./ui/button";
 
 export default function MediaCard({
   item: initialItem,

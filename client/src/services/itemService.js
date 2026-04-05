@@ -59,14 +59,28 @@ export const updateItem = async (itemId, updateData) => {
   return response;
 };
 
-export const getItemsFromDB = async () => {
-  const response = await fetch(`${API_URL}/`, {
+export const getItemsFromDB = async (page = 1, limit = 20) => {
+  const response = await fetch(`${API_URL}/?page=${page}&limit=${limit}`, {
     method: "GET",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+  return response;
+};
+export const getDeletedItemsFromDB = async (page = 1, limit = 20) => {
+  const response = await fetch(
+    `${API_URL}/deleted?page=${page}&limit=${limit}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
 
   return response;
 };
