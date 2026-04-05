@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -8,9 +8,11 @@ import {
   Play,
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [showDemo, setShowDemo] = useState(false);
 
   return (
     <section id="hero" className="relative pt-32 pb-24 overflow-hidden">
@@ -65,10 +67,29 @@ const Hero = () => {
               Start Building Your Brain
               <ArrowRight className="h-4 w-4" />
             </button>
-            <button className="flex items-center gap-2 rounded-full border border-border bg-background px-8 py-4 text-foreground font-medium hover:bg-card transition-colors">
+            <button
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-8 py-4 text-foreground font-medium hover:bg-card transition-colors"
+              onClick={() => setShowDemo(true)}
+            >
               <Play className="h-4 w-4" />
               View Demo
             </button>
+
+            <Dialog open={showDemo} onOpenChange={setShowDemo}>
+              <DialogContent className="w-5xl p-0 overflow-hidden bg-black border-none ring-0">
+                <DialogTitle className="sr-only">
+                  Product Demo Video
+                </DialogTitle>
+                <div className="relative w-full ">
+                  <video
+                    src="/7f470e7f133054a02d49f79348e2bd3c.mp4"
+                    className="w-full h-full object-contain"
+                    controls
+                    autoPlay
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
           </motion.div>
         </div>
 

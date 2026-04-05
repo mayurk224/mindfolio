@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Globe,
   Link2,
+  Loader2,
   Plus,
   Share2,
   Sparkles,
@@ -131,7 +132,13 @@ function TagPill({ children, onRemove }) {
   );
 }
 
-export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
+export default function ItemDetailModal({
+  item,
+  isOpen,
+  onClose,
+  onUpdate,
+  onDelete,
+}) {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState([]);
   const [title, setTitle] = useState("");
@@ -140,7 +147,9 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const tagInputRef = useRef(null);
+  const initialValuesRef = useRef({ title: "", textContent: "", notes: "" });
 
   useEffect(() => {
     if (!item) return;
@@ -152,7 +161,54 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
     setIsPreviewLoading(Boolean(item.url));
     setIsAddingTag(false);
     setNewTag("");
+
+    // Initialize ref with fresh values from the item prop
+    initialValuesRef.current = {
+      title: item.title || "",
+      textContent: item.textContent || "",
+      notes: item.userNotes || "",
+    };
   }, [item]);
+
+  // Debounced auto-save for Title, Text Content, and User Notes
+  useEffect(() => {
+    if (!item?._id) return;
+
+    const hasChanged =
+      title !== initialValuesRef.current.title ||
+      textContent !== initialValuesRef.current.textContent ||
+      notes !== initialValuesRef.current.notes;
+
+    if (!hasChanged) return;
+
+    const timeoutId = setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        const updateData = {};
+        if (title !== initialValuesRef.current.title) updateData.title = title;
+        if (textContent !== initialValuesRef.current.textContent)
+          updateData.textContent = textContent;
+        if (notes !== initialValuesRef.current.notes)
+          updateData.userNotes = notes;
+
+        const response = await updateItem(item._id, updateData);
+        if (!response.ok) throw new Error("Update failed");
+
+        const updatedItem = await response.json();
+        onUpdate?.(updatedItem);
+
+        // Update ref so we don't trigger again for these same values
+        initialValuesRef.current = { title, textContent, notes };
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+        toast.error("Failed to auto-save changes.");
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000); // 1-second debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [title, textContent, notes, item?._id, onUpdate]);
 
   // Auto-focus the tag input whenever it becomes visible
   useEffect(() => {
@@ -578,9 +634,17 @@ export default function ItemDetailModal({ item, isOpen, onClose, onDelete }) {
                 <Trash2 className="h-4 w-4" />
               </Button>
 
-              <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-                <Link2 className="h-3.5 w-3.5" />
-                <span className="truncate">{domain || "Local note"}</span>
+              <div className="ml-auto flex items-center gap-4 text-xs text-muted-foreground">
+                {isSaving && (
+                  <div className="flex items-center gap-1.5 text-primary/80 animate-in fade-in slide-in-from-right-2 duration-300">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span className="font-medium">Saving...</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Link2 className="h-3.5 w-3.5" />
+                  <span className="truncate">{domain || "Local note"}</span>
+                </div>
               </div>
             </div>
           </div>

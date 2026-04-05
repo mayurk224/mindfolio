@@ -140,6 +140,7 @@ export default function TimelineSection({
         item={selectedItem}
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
+        onUpdate={onItemUpdate}
         onDelete={(deletedId) => {
           setSelectedItem(null);
           onItemDelete?.(deletedId);
