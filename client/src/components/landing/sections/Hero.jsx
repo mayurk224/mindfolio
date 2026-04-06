@@ -82,7 +82,7 @@ const Hero = () => {
                 </DialogTitle>
                 <div className="relative w-full ">
                   <video
-                    src="/7f470e7f133054a02d49f79348e2bd3c.mp4"
+                    src="https://ik.imagekit.io/m0no8ccps/Mindfolio%20Demo%20(1).mp4"
                     className="w-full h-full object-contain"
                     controls
                     autoPlay
