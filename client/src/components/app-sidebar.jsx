@@ -51,7 +51,7 @@ export function AppSidebar({ activeTab, onTabChange, ...props }) {
               className="md:h-8 md:p-0"
               onClick={() => onTabChange("Home")}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-full text-sidebar-primary-foreground">
                 <img src="/mindfolio.png" alt="" />
               </div>
               <div className="grid flex-1 text-left leading-tight">

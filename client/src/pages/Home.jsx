@@ -202,10 +202,10 @@ const Home = () => {
       : items.filter((item) => item.type === activeTab);
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={false} className="h-screen overflow-hidden">
       <AppSidebar activeTab={sidebarTab} onTabChange={setSidebarTab} />
 
-      <SidebarInset>
+      <SidebarInset className="h-full overflow-y-auto">
         <header className="sticky top-0 flex flex-col shrink-0 gap-4 border-b bg-background/95 backdrop-blur-sm z-50 px-4 md:px-6 pt-4 md:pt-6">
           <div className="flex gap-2">
             <SidebarTrigger className="-ml-1 h-8 w-8 hover:bg-accent transition-colors" />

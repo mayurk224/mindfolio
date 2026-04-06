@@ -7,6 +7,9 @@ const technologies = [
   { name: 'Pixtral', description: 'Vision Engine' },
   { name: 'BullMQ', description: 'Background Workers' },
   { name: 'LangChain', description: 'AI Tooling' },
+  { name: 'ImageKit', description: 'Media Processing' },
+  { name: 'Redis', description: 'Caching Engine' },
+  { name: 'shadcn UI', description: 'Premium UI' },
 ];
 
 const TechStack = () => {
