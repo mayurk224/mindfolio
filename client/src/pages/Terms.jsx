@@ -5,7 +5,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
-const LAST_UPDATED = "April 5, 2025";
+const LAST_UPDATED = "April 6, 2026";
 
 const EMAIL = "mayurkamble0250@gmail.com";
 
@@ -50,9 +50,9 @@ const sections = [
     id: "liability",
     title: "5. Limitation of Liability",
     content: [
-      `To the fullest extent permitted by applicable law, Mindfolio and its affiliates, officers, employees, and partners shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of (or inability to access or use) the Service.`,
-      `Our total liability to you for any claim arising out of or relating to these Terms or the Service shall not exceed the greater of (a) the amounts you have paid to us in the twelve (12) months prior to the claim or (b) one hundred US dollars ($100).`,
-      `Some jurisdictions do not allow the exclusion of certain warranties or the limitation or exclusion of liability for certain types of damages. Accordingly, some of the above limitations may not apply to you. In such jurisdictions, our liability will be limited to the maximum extent permitted by law.`,
+      `To the fullest extent permitted by applicable law, Mindfolio is provided as a personal project, and its developer shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of (or inability to access or use) the Service.`,
+      `Because Mindfolio is a independently developed personal project, the total liability to you for any claim arising out of or relating to these Terms or the Service shall not exceed the amounts you have paid to the developer in the twelve (12) months prior to the claim (if any), or zero dollars ($0.00).`,
+      `Some jurisdictions do not allow the exclusion of certain warranties or the limitation or exclusion of liability for certain types of damages. Accordingly, some of the above limitations may not apply to you. In such jurisdictions, liability will be limited to the maximum extent permitted by law.`,
     ],
   },
 ];
