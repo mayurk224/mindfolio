@@ -76,11 +76,11 @@ const Hero = () => {
             </button>
 
             <Dialog open={showDemo} onOpenChange={setShowDemo}>
-              <DialogContent className="w-5xl p-0 overflow-hidden bg-black border-none ring-0">
+              <DialogContent className="sm:max-w-5xl w-full p-0 overflow-hidden bg-black border-none ring-0">
                 <DialogTitle className="sr-only">
                   Product Demo Video
                 </DialogTitle>
-                <div className="relative w-full ">
+                <div className="relative w-full aspect-video">
                   <video
                     src="https://ik.imagekit.io/m0no8ccps/Mindfolio%20Demo%20(1).mp4"
                     className="w-full h-full object-contain"
