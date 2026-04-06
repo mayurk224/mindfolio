@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ChromeIcon } from "@hugeicons/core-free-icons/index";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -58,22 +60,40 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center gap-4 pt-4"
+            className="flex flex-col items-center gap-6 pt-4"
           >
-            <button
-              className="flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-              onClick={() => navigate("/signup")}
-            >
-              Start Building Your Brain
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            <button
-              className="flex items-center gap-2 rounded-full border border-border bg-background px-8 py-4 text-foreground font-medium hover:bg-card transition-colors"
-              onClick={() => setShowDemo(true)}
-            >
-              <Play className="h-4 w-4" />
-              View Demo
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <button
+                className="flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+                onClick={() => navigate("/signup")}
+              >
+                Start Building Your Brain
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                className="flex items-center gap-2 rounded-full border border-border bg-background px-8 py-4 text-foreground font-medium hover:bg-card transition-colors"
+                onClick={() => setShowDemo(true)}
+              >
+                <Play className="h-4 w-4" />
+                View Demo
+              </button>
+              <a
+                href="https://ik.imagekit.io/m0no8ccps/chrome-extension.zip"
+                download
+                className="flex items-center gap-2 rounded-full border border-border bg-background px-8 py-4 text-foreground font-medium hover:bg-card transition-all active:scale-95"
+              >
+                <HugeiconsIcon icon={ChromeIcon} />
+                Chrome Extension
+              </a>
+            </div>
+
+            <p className="text-xs text-muted-foreground flex items-center gap-2 bg-primary/5 px-4 py-1.5 rounded-full border border-primary/10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              Extension is currently in development phase
+            </p>
 
             <Dialog open={showDemo} onOpenChange={setShowDemo}>
               <DialogContent className="sm:max-w-5xl w-full p-0 overflow-hidden bg-black border-none ring-0">
