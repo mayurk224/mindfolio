@@ -20,6 +20,10 @@ export const useGoogleLogin = () => {
 
       if (res.status === 200) {
         setUser(data.user);
+        // Store token in localStorage so the Chrome extension can read it
+        if (data.token) {
+          localStorage.setItem("mindfolio_token", data.token);
+        }
         toast.success("Login successful. Redirecting...");
         navigate("/");
       } else if (res.status === 404) {

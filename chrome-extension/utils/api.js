@@ -43,17 +43,29 @@ export async function requestJson(url, init = {}) {
   }
 }
 
+/**
+ * Sends a payload to the backend using Bearer token auth (not cookies).
+ * The token is read from chrome.storage.local via getStoredToken().
+ */
 export async function sendPayloadToBackend(payload) {
+  const { getStoredToken } = await import("./auth.js");
+  const token = await getStoredToken();
+
   const url = joinUrl(EXTENSION_CONFIG.apiBaseUrl, EXTENSION_CONFIG.savePath);
   const attempts = Math.max(0, EXTENSION_CONFIG.retryAttempts) + 1;
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const response = await requestJson(url, {
       method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 

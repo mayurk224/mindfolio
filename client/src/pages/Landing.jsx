@@ -6,6 +6,7 @@ import Features from '@/components/landing/sections/Features';
 import TechStack from '@/components/landing/sections/TechStack';
 import DesignSystemSection from '@/components/landing/sections/DesignSystemSection';
 import Footer from '@/components/landing/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const Landing = () => {
   return (
@@ -19,6 +20,7 @@ const Landing = () => {
           <DesignSystemSection />
         </main>
         <Footer />
+        <ScrollToTop />
     </div>
   )
 }

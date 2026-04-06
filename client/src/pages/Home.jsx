@@ -20,6 +20,7 @@ import TimelineSection from "@/components/TimelineSection";
 import CollectionSection from "@/components/CollectionSection";
 import { useItem } from "@/hooks/useItem";
 import PopoverForm from "@/components/PopoverForm";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const Home = () => {
   const [items, setItems] = useState([]);
@@ -31,6 +32,7 @@ const Home = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const observerTarget = useRef(null);
+  const sidebarInsetRef = useRef(null);
   const { user } = useAuthContext();
   const { fetchItems, fetchDeletedItems, isLoading } = useItem();
 
@@ -205,7 +207,7 @@ const Home = () => {
     <SidebarProvider defaultOpen={false} className="h-screen overflow-hidden">
       <AppSidebar activeTab={sidebarTab} onTabChange={setSidebarTab} />
 
-      <SidebarInset className="h-full overflow-y-auto">
+      <SidebarInset ref={sidebarInsetRef} className="h-full overflow-y-auto">
         <header className="sticky top-0 flex flex-col shrink-0 gap-4 border-b bg-background/95 backdrop-blur-sm z-50 px-4 md:px-6 pt-4 md:pt-6">
           <div className="flex gap-2">
             <SidebarTrigger className="-ml-1 h-8 w-8 hover:bg-accent transition-colors" />
@@ -290,6 +292,8 @@ const Home = () => {
             </PopoverContent>
           </Popover>
         </div>
+
+        <ScrollToTop scrollContainerRef={sidebarInsetRef} />
       </SidebarInset>
     </SidebarProvider>
   );

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const LAST_UPDATED = "April 5, 2025";
 
@@ -152,6 +153,7 @@ const LegalPrivacy = () => {
       </main>
 
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };

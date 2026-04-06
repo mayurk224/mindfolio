@@ -141,6 +141,8 @@ async function googleLogin(req, res) {
 
     return res.status(200).json({
       message: "Login successful",
+      // Also return token in body so the Chrome extension can store it in localStorage
+      token: appToken,
       user: {
         id: user._id,
         name: user.displayName,
@@ -188,7 +190,15 @@ async function googleSignup(req, res) {
 }
 
 async function getMe(req, res) {
-  const { token } = req.cookies;
+  // Accept token from cookie (web app) OR Authorization: Bearer header (Chrome extension)
+  let token = req.cookies?.token;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+  }
 
   if (!token) {
     return res

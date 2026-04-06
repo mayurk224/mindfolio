@@ -36,6 +36,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await logoutService();
       setUser(null);
+      // Clear extension token so Chrome extension loses auth
+      localStorage.removeItem("mindfolio_token");
     } catch (error) {
       console.error("Logout failed:", error);
     }

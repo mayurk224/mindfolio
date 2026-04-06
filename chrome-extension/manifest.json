@@ -3,7 +3,7 @@
   "name": "Mindfolio",
   "version": "1.0.0",
   "description": "Save webpages, images, videos, and YouTube links to your Mindfolio second brain.",
-  "permissions": ["contextMenus", "activeTab", "scripting", "tabs"],
+  "permissions": ["contextMenus", "activeTab", "scripting", "tabs", "storage"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
     "service_worker": "background.js",
@@ -13,6 +13,14 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://mindfolio-delta.vercel.app/*",
+        "http://localhost:5173/*"
+      ],
+      "js": ["token_bridge.js"],
       "run_at": "document_idle"
     }
   ],
