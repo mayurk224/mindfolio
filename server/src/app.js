@@ -59,6 +59,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Server is awake" });
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
