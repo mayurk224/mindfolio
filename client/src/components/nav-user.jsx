@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Avatar,
   AvatarFallback,
@@ -27,7 +28,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UnfoldMoreIcon, SparklesIcon, CheckmarkBadgeIcon, CreditCardIcon, NotificationIcon, LogoutIcon } from "@hugeicons/core-free-icons"
 import { useAuthContext } from "@/context/AuthContext"
-import { LogOut, Sun, Moon, Monitor } from "lucide-react"
+import { LogOut, Sun, Moon, Monitor, Loader2 } from "lucide-react"
 import { useTheme } from "./theme-provider"
 
 export function NavUser({
@@ -36,6 +37,18 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const { logout } = useAuthContext();
   const { setTheme } = useTheme();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -102,9 +115,13 @@ export function NavUser({
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
-              <LogOut strokeWidth={2} />
-              Log out
+            <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <LogOut strokeWidth={2} />
+              )}
+              {isLoggingOut ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
