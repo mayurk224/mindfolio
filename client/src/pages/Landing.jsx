@@ -10,7 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen max-w-7xl mx-auto bg-background text-foreground flex flex-col">
         <Navbar />
         <main className="flex-1">
           <Hero />
